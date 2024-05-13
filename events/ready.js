@@ -7,6 +7,7 @@ const { updateCachePeriodically } = require('./blacklist');
 const { checkCreatedChannels } = require('../function/cleanup');
 const { checkEntrance } = require('../function/entrance');
 const { sendFurry, fiftyPercentChance } = require('./petfurry');
+const { updateGagged } = require('./gagMsg');
 
 client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
@@ -14,6 +15,7 @@ client.on("ready", async () => {
     checkCreatedChannels()
     checkEntrance()
     sendFurry()
+    updateGagged()
     setInterval(() => {
         client.user.setActivity('furry booty', { type: ActivityType.Watching});
         checkBumping()
