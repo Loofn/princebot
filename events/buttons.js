@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ChannelType } = require('discord.js');
 const client = require('..');
 const con = require('../function/db')
 const {defaultAvatar} = require('../function/sus')
