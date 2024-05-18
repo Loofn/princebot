@@ -62,11 +62,16 @@ function shortenString(str, maxLength){
     }
 }
 
+function getRandomInteger(x) {
+    return Math.floor(Math.random() * x) + 1;
+}
+
 module.exports = {
     isHexColor,
     isIDList,
     getDominantColorFromURL,
     isImageLink,
     getWeather,
-    shortenString
+    shortenString,
+    getRandomInteger
 }
