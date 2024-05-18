@@ -1,7 +1,8 @@
-const { ChannelType, PermissionFlagsBits } = require("discord.js");
+const { ChannelType, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const client = require("..");
 const con = require('../function/db')
 const {saveUserRoles} = require('../function/userRoles')
+const serverRoles = require('../data/serverRoles.json')
 
 async function defaultAvatar(userId, remove=true){
     const guild = client.guilds.cache.get('1231299437519966269');
