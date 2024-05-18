@@ -45,7 +45,7 @@ module.exports = {
         const embed = new EmbedBuilder()
         .setTitle(`Statistics about Mutt`)
         .setColor("DarkButNotBlack")
-        .setDescription(`Current uptime is \`${getUptime().fromNow(true)}\`\n\n${interaction.client.user} has been developed by <@1231383939101360260> for \`~${totalHours} hours\`, starting ${daysCoded}`)
+        .setDescription(`Current uptime is \`${getUptime().fromNow(true)}\`\n\n${interaction.client.user} has been developed by <@102756256556519424> for \`~${totalHours} hours\`, starting ${daysCoded}`)
         .setThumbnail(interaction.client.user.displayAvatarURL())
         .addFields(
             {name: `Lines of code`, value: `\`${totalLines}\``, inline: true},
