@@ -3,7 +3,8 @@ const path = require('path');
 const {glob} = require('glob')
 const { ApplicationCommandType, EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const moment = require('moment');
-const con = require('../../function/db')
+const con = require('../../function/db');
+const { getUptime } = require('../../function/uptime');
 
 module.exports = {
     name: 'bot',
@@ -23,7 +24,6 @@ module.exports = {
         const daysCoded = started.fromNow();
         const avghour = 3;
         const daysBetween = moment.duration(now.diff(started)).asDays();
-        console.log(daysBetween)
         const totalHours = Math.round(daysBetween * avghour);
 
         const usedMem = Math.round(process.memoryUsage().rss / 1024 / 1024);
@@ -45,7 +45,7 @@ module.exports = {
         const embed = new EmbedBuilder()
         .setTitle(`Statistics about Mutt`)
         .setColor("DarkButNotBlack")
-        .setDescription(`${interaction.client.user} has been developed by <@1231383939101360260> for \`~${totalHours} hours\`, starting ${daysCoded}`)
+        .setDescription(`Current uptime is \`${getUptime().fromNow(true)}\`\n\n${interaction.client.user} has been developed by <@1231383939101360260> for \`~${totalHours} hours\`, starting ${daysCoded}`)
         .setThumbnail(interaction.client.user.displayAvatarURL())
         .addFields(
             {name: `Lines of code`, value: `\`${totalLines}\``, inline: true},

@@ -8,6 +8,7 @@ const { checkCreatedChannels } = require('../function/cleanup');
 const { checkEntrance, remindAboutRules } = require('../function/entrance');
 const { sendFurry, fiftyPercentChance } = require('./petfurry');
 const { updateGagged } = require('./gagMsg');
+const { getUptime } = require('../function/uptime');
 
 client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
@@ -16,6 +17,7 @@ client.on("ready", async () => {
     checkEntrance()
     sendFurry()
     updateGagged()
+    console.log("Started", getUptime().fromNow())
 
     // SHORTER INTERVAL -> 10 seconds
     setInterval(() => {
