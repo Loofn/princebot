@@ -5,7 +5,7 @@ const remindUnverified = require('../timers/remindUnverified');
 const { checkBumping } = require('./bumpReminder');
 const { updateCachePeriodically } = require('./blacklist');
 const { checkCreatedChannels } = require('../function/cleanup');
-const { checkEntrance } = require('../function/entrance');
+const { checkEntrance, remindAboutRules } = require('../function/entrance');
 const { sendFurry, fiftyPercentChance } = require('./petfurry');
 const { updateGagged } = require('./gagMsg');
 
@@ -16,14 +16,22 @@ client.on("ready", async () => {
     checkEntrance()
     sendFurry()
     updateGagged()
+
+    // SHORTER INTERVAL -> 10 seconds
     setInterval(() => {
         client.user.setActivity('furry booty', { type: ActivityType.Watching});
         checkBumping()
         remindUnverified()
         checkCreatedChannels()
         removeUnverified()
-        checkEntrance()
+        
     }, 10000);
+
+    // LONGER INTERVAL -> 1 HOUR
+    setInterval(() => {
+        checkEntrance()
+        remindAboutRules()
+    }, 3600000)
 
     setInterval(() => {
         if(fiftyPercentChance()){
