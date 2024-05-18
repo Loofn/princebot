@@ -103,8 +103,9 @@ async function storeOldUsers() {
 async function remindAboutRules(){
     const guild = client.guilds.cache.get('1231299437519966269');
 
-    const usersToCheck = guild.members.cache.filter(memb => memb.roles.cache.size === 1);
-    usersToCheck.forEach(async (member) => {
+    const usersToCheck = await guild.members.fetch()
+    const filteredMembers = usersToCheck.filter(memb => memb.roles.cache.size === 1);
+    filteredMembers.forEach(async (member) => {
         const joinDate = moment(member.joinedAt);
         const hours = moment().subtract(2, 'hours');
         if(moment(joinDate).isBefore(hours)){
