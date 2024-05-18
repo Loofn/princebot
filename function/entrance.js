@@ -12,12 +12,11 @@ const serverRoles = require('../data/serverRoles.json')
 async function checkEntrance(){
 
     const guild = client.guilds.cache.get('1231299437519966269');
-    const usersToCheck = guild.members.cache.filter(memb => memb.roles.cache.size === 1);
-    //console.log(usersToCheck.size)
-    usersToCheck.forEach(async (member) => {
+    const usersToCheck = await guild.members.fetch()
+    const filteredMembers = usersToCheck.filter(memb => memb.roles.cache.size === 1);
+    filteredMembers.forEach(async (member) => {
         const joinDate = moment(member.joinedAt);
         const twelveHours = moment().subtract(12, 'hours');
-
         if(moment(joinDate).isBefore(twelveHours)){
             const welcomeMsgId = await getWelcomeMsg(member.id);
             member.kick(`Not accepting rules in 12 hours.`)
@@ -108,19 +107,24 @@ async function remindAboutRules(){
     usersToCheck.forEach(async (member) => {
         const joinDate = moment(member.joinedAt);
         const hours = moment().subtract(2, 'hours');
-
         if(moment(joinDate).isBefore(hours)){
-            const embed = new EmbedBuilder()
-                .setTitle(`POKE!!`)
-                .setThumbnail(guild.iconURL())
-                .setDescription(`Hello there :wave: Seems like you have joined \`${guild.name}\` but then never accepted our rules <:Furr_Gasp:1232039664584626276> Make sure you check them, and accept them before you are kicked!!`)
-                .setColor("Red")
-                .setTimestamp()
-
-            member.send({ embeds: [dmUser] }).catch(error => {
-                console.error(`Failed to send message to user ${member.id}:`, error);
-            });
+            con.query(`SELECT * FROM users WHERE user='${member.id}' AND ruleReminder=0 AND isMember=0`, function (err,res ){
+                if(res.length === 0){
+                    const embed = new EmbedBuilder()
+                        .setTitle(`POKE!!`)
+                        .setThumbnail(guild.iconURL())
+                        .setDescription(`Hello there :wave: Seems like you have joined \`${guild.name}\` but then never accepted our rules <:Furr_Gasp:1232039664584626276> Make sure you check them, and accept them before you are kicked!!`)
+                        .setColor("Red")
+                        .setTimestamp()
+        
+                    member.send({ embeds: [embed] }).catch(error => {
+                        console.error(`Failed to send message to user ${member.id}:`, error);
+                    });
+                    con.query(`UPDATE users SET ruleReminder=1 WHERE user='${member.id}'`)
+                }
+            })
         }
+        
     })
 }
 
