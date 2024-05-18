@@ -2,6 +2,7 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('
 const client = require('..');
 const con = require('../function/db');
 const { getDominantColorFromURL } = require('../function/utils');
+const { removePoints } = require('../function/furrygame');
 
 async function addToGame(userId, points=0){
     return new Promise((resolve, reject) => {
@@ -117,22 +118,24 @@ client.on('interactionCreate', async interaction => {
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Aww... they got what they were looking for!`)
-                    .setDescription(`${member} satisfied the needs of this poor furry! \`+1 cumcoins\` <a:coom:1235063571868680243>`)
+                    .setDescription(`${member} satisfied the needs of this poor furry! \`+2 cumcoins\` <a:coom:1235063571868680243>`)
                     .setImage(oldEmbed.image.url)
                     .setFooter({text: `This furry was satisfied!\n\Keep eyes out for next one!`})
                     .setColor(oldEmbed.color)
 
                 msg.edit({embeds: [embed], components: []})
-                addToGame(member.id, 1)
+                addToGame(member.id, 2)
             } else {
                 const embed = new EmbedBuilder()
                     .setTitle(`Fuck... they left angry..`)
-                    .setDescription(`${member} tried to \`${splitId[1].toUpperCase()}\` them but it did not go so well!`)
+                    .setDescription(`${member} tried to \`${splitId[1].toUpperCase()}\` them but it did not go so well!\n\n\`-1 cumcoins\` <a:coom:1235063571868680243>`)
                     .setImage(oldEmbed.image.url)
                     .setFooter({text: `This furry was was not satisfied, let's hope better luck next time!`})
                     .setColor(oldEmbed.color)
 
                 msg.edit({embeds: [embed], components: []})
+                await addToGame(member.id)
+                removePoints(member.id, 1)
             }
 
             changeFurryState(false);
