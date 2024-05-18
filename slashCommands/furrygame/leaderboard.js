@@ -30,7 +30,7 @@ module.exports = {
                 for (let i = 0; i < res.length; i++) {
                     let user = await guild.members.cache.get(res[i].user);
                     if(user === undefined) continue;
-                    if (count === 4) break;
+                    if (count === 5) break;
                     count++;
                     userslist += `${placements[i]} ${user} \`${res[i].points} cumcoins\`\n`
                 }
