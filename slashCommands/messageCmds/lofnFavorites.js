@@ -5,6 +5,9 @@ const serverRoles = require('../../data/serverRoles.json');
 const serverChannels = require('../../data/channels.json');
 const con = require('../../function/db');
 const moment = require('moment');
+const { getRandomInteger } = require('../../function/utils');
+const { givePoints } = require('../../function/furrygame');
+const { addToGame } = require('../../events/petfurry');
 
 module.exports = {
     name: 'Lofn nutted',
@@ -32,9 +35,12 @@ module.exports = {
                         con.query(`INSERT INTO stats VALUES ('${targetMessage.author.id}', 'nutcount', '1')`)
                     }
                     
+                    let cumcoin = getRandomInteger(10)
+                    await addToGame(targetMessage.author.id);
+                    givePoints(targetMessage.author.id, cumcoin)
                     let exposedMsg = new EmbedBuilder()
                     .setAuthor({name: `${targetMessage.author.globalName} made Lofn nut`, iconURL: targetMessage.author.displayAvatarURL()})
-                    .setDescription(`💦💦 *Fuuuckkghhh...*\n*${targetMessage.author} has made Lofn nut ${nutcount} time(s)*\n\n${targetMessage.content}`)
+                    .setDescription(`💦💦 *Fuuuckkghhh...*\n*${targetMessage.author} has made Lofn nut ${nutcount} time(s)*\nThey were also awarded \`+${cumcoin} cumcoins\` <a:Lewd_Coom:1235063571868680243>\n\n${targetMessage.content}`)
                     .setFooter({text: `Lofn has nutted to this one... ${moment(targetMessage.createdTimestamp).format("DD/MM/YYYY")}`})
                     .addFields(
                         {name: `Jump to message`, value: `${targetMessage.url}`, inline:true}
