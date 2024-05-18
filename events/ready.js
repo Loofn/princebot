@@ -14,7 +14,8 @@ client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
     updateCachePeriodically()
     checkCreatedChannels()
-    checkEntrance()
+    await checkEntrance()
+    remindAboutRules()
     sendFurry()
     updateGagged()
     console.log("Started", getUptime().fromNow())
