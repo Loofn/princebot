@@ -1,4 +1,4 @@
-const { EmbedBuilder, ChannelType, ButtonStyle, ButtonBuilder } = require('discord.js');
+const { EmbedBuilder, ChannelType, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const client = require('..');
 const con = require('../function/db')
 const {defaultAvatar} = require('../function/sus')
@@ -18,10 +18,14 @@ client.on('interactionCreate', async interaction => {
         const splitId = customId.split('-');
 
         if(customId === 'ageverifybtn'){
+            const kindergartenCh = guild.channels.cache.get('1233466742148300984');
+            if(await kindergartenCh.threads.cache.find(th => th.name.endsWith(member.user.username))){
+                return await interaction.reply({content: `You have open age verification thread already!`, ephemeral: true})
+            }
+
             await saveUserRoles(member.id);
             await member.roles.add([serverRoles.unverified]);
 
-            const kindergartenCh = guild.channels.cache.get('1233466742148300984');
             kindergartenCh.threads.create({
                 name: `Age Verify: ${member.user.username}`,
                 type: ChannelType.PrivateThread,
@@ -65,9 +69,9 @@ client.on('interactionCreate', async interaction => {
                     .setFooter({text: `Follow the guidelines above so you know what you are expected to do`, iconURL: guild.iconURL()})
 
                 await thread.send({embeds: [verifyGuidelines], components: [row]});
-                con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}')`);
+                con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}') ON DUPLICATE KEY UPDATE thread='${thread.id}'`);
 
-                await interaction.editReply({content: `Your age verify has been opened in ${thread}!`})
+                await interaction.reply({content: `Your age verify has been opened in ${thread}!`, ephemeral: true})
             })
         }
         if(splitId[0] === 'acceptrules'){
