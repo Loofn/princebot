@@ -48,7 +48,26 @@ module.exports = {
                 .setDescription(`<:Catto_Gesp:1236763359215620257> Could not rob ${targetUser}, they are too on alert currently!`)
 
             return await interaction.reply({embeds: [embed]})
-        } else {
+        }
+
+        if(member.id === targetUser.id){
+            const memberCoins = await getPoints(member.id);
+            const amountToRob = getRandomInteger(Math.round(memberCoins/3))
+            const embed = new EmbedBuilder()
+                .setTitle(`What the fuck?!`)
+                .setColor("Red")
+                .setDescription(`You decided to donate \`${amountToRob} cumcoins\` <a:Lewd_Coom:1235063571868680243> to <@102756256556519424> <a:Catto_Tongue:1235220627237900400>`)
+
+            removePoints(member.id, amountToRob)
+            givePoints(targetUser.id, amountToRob)
+            addCooldown(targetUser.id)
+            addCooldown(member.id)
+            addSelfCooldown(member.id)
+
+            return await interaction.reply({embeds: [embed]})
+        }
+        
+        else {
 
             const targetPoints = await getPoints(targetUser.id);
             const amountToRob = getRandomInteger(Math.round(targetPoints/2))
