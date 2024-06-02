@@ -30,7 +30,7 @@ client.on('messageCreate', async message => {
             messageCount.set(channelId, count + 1);
             console.log("YES", messageCount.get(channelId))
             if(count + 1 >= 5){
-                message.channel.bulkDelete(5)
+                message.delete()
                 const embed = new EmbedBuilder()
                     .setTitle(`Dude... stop...`)
                     .setDescription(`To prevent pushing images and videos up with useless messages, please utilise <#1235252848627814440> channel!`)
@@ -40,7 +40,7 @@ client.on('messageCreate', async message => {
                 message.channel.send({content: `${message.author}`, embeds: [embed]}).then(msg => {
                     setTimeout(() => {
                         msg.delete().catch(console.error())
-                    }, 15000);
+                    }, 60000);
                 })
             }
         } else {
