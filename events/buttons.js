@@ -65,6 +65,7 @@ client.on('interactionCreate', async interaction => {
                     .setTitle(`Age Verification of ${member.user.username}`)
                     .setDescription(`Here is what we need you to do, to verify your age. Remember if you do not verify your age, you will be **banned** from the server.\n\n## Steps to verify\n:arrow_right: You need either birth certificate, driver's license or passport.\n\n:arrow_right: Take a picture of the ID of your choosing, blurr any information on it except **date of birth** and place it on top of the paper. Paper has to have the server name and today's date written to it.\n\nOnce you have sent the image, wait for <@&1231405365674115112> to verify you.`)
                     .setColor("LuminousVividPink")
+                    .setImage('https://i.imgur.com/E8wPLE8.png')
                     .setTimestamp()
                     .setFooter({text: `Follow the guidelines above so you know what you are expected to do`, iconURL: guild.iconURL()})
 
