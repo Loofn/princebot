@@ -26,7 +26,8 @@ module.exports = {
                 {name: `pet`, value: `pet`},
                 {name: `suck`, value: `suck`},
                 {name: `fuck`, value: `fuck`},
-                {name: `ride`, value: `ride`}
+                {name: `ride`, value: `ride`},
+                {name: `lick`, value: `lick`}
             ]
         }
     ],

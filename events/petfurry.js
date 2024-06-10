@@ -32,7 +32,7 @@ async function sendFurry(){
 
         const embedFurry = new EmbedBuilder()
         .setTitle(`Poor furry looking for attention...`)
-        .setDescription(`**Pat**, **Suck**, **Fuck** or **Ride** the furry to make them feel better!\n*Remember they will only like one of the actions...!!*`)
+        .setDescription(`**Pat**, **Lick**, **Suck**, **Fuck** or **Ride** the furry to make them feel better!\n*Remember they will only like one of the actions...!!*`)
         .setFooter({text: `Use buttons to react to the furry`})
         .setImage(res[randomFurry].imgurl)
         .setColor(hex);
@@ -40,6 +40,11 @@ async function sendFurry(){
         const petBtn = new ButtonBuilder()
             .setCustomId(`furrygame-pet-${res[randomFurry].id}`)
             .setLabel(`Pet them!`)
+            .setStyle(ButtonStyle.Primary)
+
+        const lickBtn = new ButtonBuilder()
+            .setCustomId(`furrygame-lick-${res[randomFurry].id}`)
+            .setLabel(`Lick them!`)
             .setStyle(ButtonStyle.Primary)
         
         const suckBtn = new ButtonBuilder()
@@ -58,7 +63,7 @@ async function sendFurry(){
             .setStyle(ButtonStyle.Primary)
 
         const rows = new ActionRowBuilder()
-            .addComponents(petBtn, suckBtn, fuckBtn, rideBtn)
+            .addComponents(petBtn, lickBtn, suckBtn, fuckBtn, rideBtn)
 
         const channel = guild.channels.cache.get('1236764013967446016');
         changeFurryState(true);
