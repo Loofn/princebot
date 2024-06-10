@@ -40,7 +40,7 @@ module.exports = {
 
         if(amount <= balance){
             removePoints(member.id, amount);
-            givePoints(userToGive, amount)
+            givePoints(userToGive.id, parseInt(amount))
 
             const embed = new EmbedBuilder()
                 .setTitle(`Points given away`)
