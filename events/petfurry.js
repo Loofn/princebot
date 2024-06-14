@@ -1,8 +1,8 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const client = require('..');
 const con = require('../function/db');
-const { getDominantColorFromURL } = require('../function/utils');
-const { removePoints } = require('../function/furrygame');
+const { getDominantColorFromURL, chance, getRandomInteger } = require('../function/utils');
+const { removePoints, givePoints } = require('../function/furrygame');
 
 async function addToGame(userId, points=0){
     return new Promise((resolve, reject) => {
@@ -148,6 +148,24 @@ client.on('interactionCreate', async interaction => {
 
         } else return;
 
+    }
+})
+
+// Grant points randomly if posting lewds
+client.on('messageCreate', async message => {
+    let prizeReactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+    if(message.channel.parentId === '1233560718281015327'){
+        if(message.author.bot) return;
+
+        if(message.attachments.size > 0){
+            if(chance(60)){
+                await addToGame(message.author.id);
+                let prize = getRandomInteger(9);
+                await message.react('<a:Lewd_Coom:1235063571868680243>')
+                await message.react(prizeReactions[prize - 1]);
+                givePoints(message.author.id, prize);
+            }
+        }
     }
 })
 

@@ -8,6 +8,10 @@ function removePoints(userId, points){
     con.query(`UPDATE user_points SET points=points-${points} WHERE user='${userId}'`)
 }
 
+function setPoints(userId, points){
+    con.query(`UPDATE user_points SET points=${points} WHERE user='${userId}'`)
+}
+
 async function getPoints(userId){
     return new Promise((resolve, reject) => {
         con.query(`SELECT * FROM user_points WHERE user='${userId}'`, function(err, res){
@@ -23,5 +27,6 @@ async function getPoints(userId){
 module.exports = {
     givePoints,
     removePoints,
-    getPoints
+    getPoints,
+    setPoints
 }
