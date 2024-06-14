@@ -153,5 +153,33 @@ client.on('interactionCreate', async interaction => {
                 await interaction.reply({embeds: [noPerms], ephemeral: true})
             }
         }
+
+        if(splitId[0] === 'deleteChannel'){
+            if(splitId[1] === 'staff'){
+                if(await isStaff(member.id)){
+                    const deleting = new EmbedBuilder()
+                    .setDescription(`This channel is scheduled to be deleted in 10 seconds by ${member}`)
+                    .setColor("Red")
+
+                    await interaction.reply({embeds: [deleting], ephemeral: false}).then(async () => {
+                        setTimeout(() => {
+                            interaction.channel.delete().catch(err => console.error(err))
+                        }, 10000);
+                    })
+                } else {
+                    await interaction.reply({content: `You are not permitted to do this action...`, ephemeral: true});
+                }
+            } else {
+                const deleting = new EmbedBuilder()
+                    .setDescription(`This channel is scheduled to be deleted in 10 seconds by ${member}`)
+                    .setColor("Red")
+
+                    await interaction.reply({embeds: [deleting], ephemeral: false}).then(async () => {
+                        setTimeout(() => {
+                            interaction.channel.delete().catch(err => console.error(err))
+                        }, 10000);
+                    })
+            }
+        }
     }
 })

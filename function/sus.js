@@ -1,4 +1,4 @@
-const { ChannelType, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
+const { ChannelType, PermissionFlagsBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const client = require("..");
 const con = require('../function/db')
 const {saveUserRoles} = require('../function/userRoles')
@@ -35,7 +35,16 @@ async function defaultAvatar(userId, remove=true){
                 .setImage('https://i.redd.it/5v6ne0kjqf671.jpg')
                 .setDescription(`Hello there ${member}!\nYou've been **muzzled** and have reduced visibility. This is as your account is considered suspicious (default profile picture).`)
             
-            ch.send({content: `${member}<@&1231405365674115112>`, embeds: [jailEmbed]})
+            const deleteChannelBtn = new ButtonBuilder()
+                .setCustomId("deleteChannel-staff")
+                .setLabel("Delete muzzled channel")
+                .setEmoji('🗑️')
+                .setStyle(ButtonStyle.Danger)
+
+            const row = new ActionRowBuilder()
+                .addComponents(deleteChannelBtn)
+                
+            ch.send({content: `${member}<@&1231405365674115112>`, embeds: [jailEmbed], components: [row]})
         })
 
         return true;

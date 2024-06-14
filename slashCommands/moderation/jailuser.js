@@ -1,4 +1,4 @@
-const { EmbedBuilder, ApplicationCommandType, MessageFlags, roleMention, Embed, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandType, MessageFlags, roleMention, Embed, ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { isMod, isAdmin, isTrialMod } = require('../../function/roles');
 const { noPerms } = require('../../data/embeds');
 const serverRoles = require('../../data/serverRoles.json');
@@ -79,7 +79,17 @@ module.exports = {
                     .setImage('https://i.redd.it/5v6ne0kjqf671.jpg')
                     .setDescription(`Hello there ${user}!\nYou've been **muzzled** and have reduced visibility until one of our <@&1231405365674115112> explains your situation. Get comfy and grab drinks-`)
                 
-                ch.send({content: `${user}<@&1231405365674115112>`, embeds: [jailEmbed]})
+                
+                const deleteChannelBtn = new ButtonBuilder()
+                .setCustomId("deleteChannel-staff")
+                .setLabel("Delete muzzled channel")
+                .setEmoji('🗑️')
+                .setStyle(ButtonStyle.Danger)
+
+                const row = new ActionRowBuilder()
+                    .addComponents(deleteChannelBtn)
+
+                ch.send({content: `${user}<@&1231405365674115112>`, embeds: [jailEmbed], components: [row]})
             })
 
         } else {
