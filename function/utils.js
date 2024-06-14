@@ -62,8 +62,21 @@ function shortenString(str, maxLength){
     }
 }
 
+/**
+ * Random integer between 1 and X
+ * @param {Integer} x Maximum integer
+ * @returns {Integer} Random integer
+ */
 function getRandomInteger(x) {
     return Math.floor(Math.random() * x) + 1;
+}
+
+function chance(percentage){
+    if(percentage < 0 || percentage > 100){
+        throw new Error('Percentage must be between 0 and 100')
+    }
+
+    return Math.random() * 100 < percentage;
 }
 
 module.exports = {
@@ -73,5 +86,6 @@ module.exports = {
     isImageLink,
     getWeather,
     shortenString,
-    getRandomInteger
+    getRandomInteger,
+    chance
 }
