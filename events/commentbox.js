@@ -2,9 +2,14 @@ const { EmbedBuilder} = require('discord.js');
 const client = require('..');
 client.on('messageCreate', async message => {
 
+    const blacklistedChannels = ["1259942649968988310"]
+
+
     if(message.channel.parentId === '1231627001035620474'){
         if(message.author.bot) return;
         if(message.channel.type !== 0) return;
+
+        if(blacklistedChannels.includes(message.channelId)) return;
         
         message.startThread({
             name: `Comments`,
