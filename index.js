@@ -1,3 +1,4 @@
+require('events').EventEmitter.prototype._maxListeners = 100;
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const fs = require('fs');
 const client = new Client({
