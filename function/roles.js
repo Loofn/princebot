@@ -31,7 +31,7 @@ async function isTrialMod(userId){
 async function isAdmin(userId){
     const guild = client.guilds.cache.get('1231299437519966269');
     const member = await guild.members.fetch(userId, {force: true, cache: true});
-    if(member.roles.cache.get('1231405230906671185')){
+    if(member.roles.cache.get('1231405230906671185') || member.roles.cache.get('1248723094542090300')){
         return true;
     } else {
         return false;
