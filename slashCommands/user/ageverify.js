@@ -85,7 +85,7 @@ module.exports = {
                 .setFooter({text: `Follow the guidelines above so you know what you are expected to do`, iconURL: guild.iconURL()})
 
             await thread.send({embeds: [verifyGuidelines], components: [row]});
-            con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}' ON DUPLICATE KEY UPDATE thread='${thread.id}')`);
+            con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}') ON DUPLICATE KEY UPDATE thread='${thread.id}'`);
 
             await interaction.editReply({content: `Your age verify has been opened in ${thread}!`})
         })
