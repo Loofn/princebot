@@ -32,7 +32,7 @@ module.exports = {
                 channel.send({embeds: [embed], content: `@here`}).then(async (msg) => {
                     await interaction.reply({content: `Wake up call send to ${msg.url}`, ephemeral: true})
                 })
-                con.query(`INSERT INTO timers (name, time) VALUES ('revive', '${moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")}')`)
+                con.query(`INSERT INTO timers (name, time) VALUES ('revive', '${moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")}') ON DUPLICATE KEY UPDATE time='${moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")}'`)
             } else {
                 
                 const embed = new EmbedBuilder()
