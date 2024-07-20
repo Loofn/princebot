@@ -5,6 +5,7 @@ const serverRoles = require('../../data/serverRoles.json');
 const { saveUserRoles } = require("../../function/userRoles");
 const moment = require('moment');
 const con = require('../../function/db');
+const { greetNewKindergarteners } = require("../../function/kindergarten");
 
 module.exports = {
     name: 'Send to Kindergarten',
@@ -38,7 +39,7 @@ module.exports = {
             await targetMember.roles.set([serverRoles.unverified]);
             const newTime = moment().add(24, 'hours').format('YYYY-MM-DD HH:mm:ss');
             con.query(`INSERT INTO kindergarten VALUES ('${targetUser.id}', '${newTime}')`)
-
+            greetNewKindergarteners(targetUser)
         } else {
             return interaction.reply({embeds: [noPerms]})
         }
