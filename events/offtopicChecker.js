@@ -7,7 +7,7 @@ client.on('messageCreate', async message => {
 
     
     if(message.author.bot) return;
-    if(message.channelId === '1235252848627814440') return;
+    if(message.channelId === '1235252848627814440' || message.channelId === '1266828617346973749') return;
     if(message.channel.parentId === '1233560718281015327'){
 
         if(message.attachments.size === 0){
