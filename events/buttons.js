@@ -154,6 +154,21 @@ client.on('interactionCreate', async interaction => {
             }
         }
 
+        if(splitId[0] === 'kickUser'){
+            if(await isStaff(member.id)){
+                guild.members.kick(splitId[1], `Kicked muzzled user by ${member.user.tag}`);
+                const deleting = new EmbedBuilder()
+                    .setDescription(`This channel is scheduled to be deleted in 10 seconds by ${member}`)
+                    .setColor("Red")
+
+                    await interaction.reply({embeds: [deleting], ephemeral: false}).then(async () => {
+                        setTimeout(() => {
+                            interaction.channel.delete().catch(err => console.error(err))
+                        }, 10000);
+                    })
+            }
+        }
+
         if(splitId[0] === 'deleteChannel'){
             if(splitId[1] === 'staff'){
                 if(await isStaff(member.id)){

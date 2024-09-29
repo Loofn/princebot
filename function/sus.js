@@ -35,14 +35,20 @@ async function defaultAvatar(userId, remove=true){
                 .setImage('https://i.redd.it/5v6ne0kjqf671.jpg')
                 .setDescription(`Hello there ${member}!\nYou've been **muzzled** and have reduced visibility. This is as your account is considered suspicious (default profile picture).`)
             
-            const deleteChannelBtn = new ButtonBuilder()
+                const deleteChannelBtn = new ButtonBuilder()
                 .setCustomId("deleteChannel-staff")
                 .setLabel("Delete muzzled channel")
                 .setEmoji('🗑️')
+                .setStyle(ButtonStyle.Primary)
+
+                const kickBtn = new ButtonBuilder()
+                .setCustomId(`kickUser-${user.id}`)
+                .setLabel("Kick muzzled user")
+                .setEmoji('🥾')
                 .setStyle(ButtonStyle.Danger)
 
             const row = new ActionRowBuilder()
-                .addComponents(deleteChannelBtn)
+                .addComponents(deleteChannelBtn, kickBtn)
                 
             ch.send({content: `${member}<@&1231405365674115112>`, embeds: [jailEmbed], components: [row]})
         })

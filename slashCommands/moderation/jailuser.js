@@ -84,10 +84,16 @@ module.exports = {
                 .setCustomId("deleteChannel-staff")
                 .setLabel("Delete muzzled channel")
                 .setEmoji('🗑️')
+                .setStyle(ButtonStyle.Primary)
+
+                const kickBtn = new ButtonBuilder()
+                .setCustomId(`kickUser-${user.id}`)
+                .setLabel("Kick muzzled user")
+                .setEmoji('🥾')
                 .setStyle(ButtonStyle.Danger)
 
                 const row = new ActionRowBuilder()
-                    .addComponents(deleteChannelBtn)
+                    .addComponents(deleteChannelBtn, kickBtn)
 
                 ch.send({content: `${user}<@&1231405365674115112>`, embeds: [jailEmbed], components: [row]})
             })
