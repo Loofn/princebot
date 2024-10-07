@@ -42,7 +42,7 @@ async function defaultAvatar(userId, remove=true){
                 .setStyle(ButtonStyle.Primary)
 
                 const kickBtn = new ButtonBuilder()
-                .setCustomId(`kickUser-${user.id}`)
+                .setCustomId(`kickUser-${member.id}`)
                 .setLabel("Kick muzzled user")
                 .setEmoji('🥾')
                 .setStyle(ButtonStyle.Danger)
