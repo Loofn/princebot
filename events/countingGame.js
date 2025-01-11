@@ -3,6 +3,7 @@ const client = require('..');
 const con = require('../function/db');
 const { ButtonBuilder } = require('discord.js');
 const { ActionRowBuilder } = require('discord.js');
+const { givePoints } = require('../function/furrygame');
 
 const participants = new Set();
 
@@ -50,29 +51,51 @@ client.on('messageCreate', async message => {
                     increaseNumber(message.author.id)
                     const record = await updateRecord(parseInt(message.content))
                     message.channel.setTopic(`Current number is ${message.content}. The record we have reached is ${record}!! :star:`)
-                    if (currentCount % 50 === 0) {
+                    if (parseInt(message.content) % 50 === 0) {
                         // Milestone reached
-                        rewardParticipants(message.channel);
+                        rewardParticipants(message.channel, parseInt(message.content));
                     }
                 } else {
                     message.react('❌')
                     resetNumber()
                     participants.clear()
-                    message.reply({embeds: [reset], components: [row]})
+                    if(currentGameNumber == 0) {
+                        message.reply({embeds: [reset]})
+                    } else {
+                        message.reply({embeds: [reset], components: [row]})
+                    }
+                    
                 }
             } else {
                 message.react('❌')
                 resetNumber()
                 participants.clear()
-                message.reply({embeds: [reset], components: [row]})
+                if(currentGameNumber == 0) {
+                    message.reply({embeds: [reset]})
+                } else {
+                    message.reply({embeds: [reset], components: [row]})
+                }
             }
         }
         
     }
 });
 
-function rewardParticipants(){
-    console.log("TODO: make reward participants")
+function rewardParticipants(channel, number){
+    const participantIds = Array.from(participants);
+
+    participantIds.forEach((id) => {
+        givePoints(id, 50);
+    })
+
+    const usernames = participantIds
+        .map((id) => `<@${id}>`)
+        .join(', ');
+
+    channel.send(`:tada: Milestone ${number} reached! Participants: ${usernames} have all been rewarded \`50 cumcoins\` <a:Lewd_Coom:1235063571868680243>`);
+
+    participants.clear();
+
 }
 
 
@@ -93,7 +116,7 @@ async function getCurrentNumber(num){
     })
 }
 
-async function checkNumber(num){
+async function checkNumber(){
     return new Promise((resolve, reject) => {
         con.query(`SELECT * FROM counting`, function (err, res){
             if(err) {
