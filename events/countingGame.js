@@ -1,10 +1,26 @@
-const { EmbedBuilder} = require('discord.js');
+const { EmbedBuilder, ButtonStyle} = require('discord.js');
 const client = require('..');
-const con = require('../function/db')
+const con = require('../function/db');
+const { ButtonBuilder } = require('discord.js');
+const { ActionRowBuilder } = require('discord.js');
+
+const participants = new Set();
+
 client.on('messageCreate', async message => {
 
     if(message.channelId === '1237471877388304424'){
         if(message.author.bot) return;
+
+        let currentGameNumber = await checkNumber()
+        const saveButton = new ButtonBuilder()
+            .setCustomId(`saveCountingStreak-${currentGameNumber}`)
+            .setLabel(`Save the streak (-${currentGameNumber} cumcoins)`)
+            .setEmoji('🙏')
+            .setStyle(ButtonStyle.Success)
+
+        const row = new ActionRowBuilder()
+            .setComponents(saveButton)
+
         const reset = new EmbedBuilder()
             .setTitle(`FUCK, YOU FUCKED IT UP!`)
             .setThumbnail('https://media.tenor.com/RDkdaZnAL8YAAAAM/furry-sad.gif')
@@ -29,24 +45,35 @@ client.on('messageCreate', async message => {
                 const lastUser = await getLastUser();
     
                 if(lastUser !== message.author.id){
+                    participants.add(message.author.id)
                     message.react('<a:nutbutton:1236762071601909911>')
                     increaseNumber(message.author.id)
                     const record = await updateRecord(parseInt(message.content))
                     message.channel.setTopic(`Current number is ${message.content}. The record we have reached is ${record}!! :star:`)
+                    if (currentCount % 50 === 0) {
+                        // Milestone reached
+                        rewardParticipants(message.channel);
+                    }
                 } else {
                     message.react('❌')
                     resetNumber()
-                    message.reply({embeds: [reset]})
+                    participants.clear()
+                    message.reply({embeds: [reset], components: [row]})
                 }
             } else {
                 message.react('❌')
                 resetNumber()
-                message.reply({embeds: [reset]})
+                participants.clear()
+                message.reply({embeds: [reset], components: [row]})
             }
         }
         
     }
 });
+
+function rewardParticipants(){
+    console.log("TODO: make reward participants")
+}
 
 
 /**
@@ -62,6 +89,17 @@ async function getCurrentNumber(num){
             }
             let nextNumber = res[0].number + 1;
             resolve(nextNumber === num);
+        })
+    })
+}
+
+async function checkNumber(num){
+    return new Promise((resolve, reject) => {
+        con.query(`SELECT * FROM counting`, function (err, res){
+            if(err) {
+                reject(err)
+            }
+            resolve(res[0].number)
         })
     })
 }
@@ -90,7 +128,7 @@ function increaseNumber(user){
 }
 
 function fixNumber(num){
-    con.query(`UPDATE counting SET number='${num}', user='102756256556519424'`)
+    con.query(`UPDATE counting SET number='${num}', user=NULL`)
 }
 
 /**
@@ -117,4 +155,9 @@ async function updateRecord(num){
  */
 function resetNumber(){
     con.query(`UPDATE counting SET number=0, user=NULL`);
+}
+
+module.exports = {
+    fixNumber,
+    resetNumber
 }

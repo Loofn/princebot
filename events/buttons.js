@@ -8,6 +8,8 @@ const { deleteVerifyThread } = require('../function/db/fetchAgeVerifyThread');
 const serverRoles = require('../data/serverRoles.json')
 const serverChannels = require('../data/channels.json');
 const { saveUserRoles } = require('../function/userRoles');
+const { getPoints, removePoints } = require('../function/furrygame');
+const { fixNumber } = require('./countingGame');
 
 client.on('interactionCreate', async interaction => {
 
@@ -16,6 +18,31 @@ client.on('interactionCreate', async interaction => {
         const customId = interaction.customId;
         const guild = interaction.member.guild;
         const splitId = customId.split('-');
+
+        if(splitId[0] === 'saveCountingStreak'){
+            const balance = await getPoints(member.id)
+            console.log(balance)
+            console.log(splitId[1])
+            if(parseInt(balance) >= parseInt(splitId[1])){
+                const msgFetch = await interaction.channel.messages.fetch({limit: 1});
+                const latestMsg = msgFetch.first();
+
+                if(latestMsg.author.bot && !latestMsg.embeds[0].title.startsWith("Streak")){
+                    removePoints(member.id, parseInt(splitId[1]));
+                    fixNumber(parseInt(splitId[1]));
+
+                    const savedEmb = new EmbedBuilder()
+                        .setTitle(`Streak has been saved!`)
+                        .setDescription(`${member} paid \`${splitId[1]}\` cumcoins to save the streak. You can now continue the game like there was no fail at all!`)
+
+                    interaction.reply({embeds: [savedEmb]});
+                } else {
+                    interaction.reply({content: `Game is going already... touche-`, ephemeral: true});
+                }
+            } else {
+                interaction.reply({content: `Insufficient cumcoins!`, ephemeral: true})
+            }
+        }
 
         if(customId === 'ageverifybtn'){
             const kindergartenCh = guild.channels.cache.get('1233466742148300984');
