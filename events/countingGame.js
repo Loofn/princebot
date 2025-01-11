@@ -12,25 +12,39 @@ client.on('messageCreate', async message => {
             .setFooter({text: `User can only say one number at a time, and it must be number higher than before`})
             .setColor("Blurple")
 
-        if(isNaN(message.content)) return message.delete();
-        if(await getCurrentNumber(parseInt(message.content))){
-            const lastUser = await getLastUser();
-
-            if(lastUser !== message.author.id){
-                message.react('<a:nutbutton:1236762071601909911>')
-                increaseNumber(message.author.id)
-                const record = await updateRecord(parseInt(message.content))
-                message.channel.setTopic(`Current number is ${message.content}. The record we have reached is ${record}!! :star:`)
+        if(message.content.startsWith("fix!") && message.author.id === '102756256556519424'){
+            let number = parseInt(message.content.split("!")[1]);
+            fixNumber(number);
+            message.react('🔨')
+            const fixed = new EmbedBuilder()
+                .setTitle(`Lofn stepped in...`)
+                .setDescription(`The number game's number was forcefully set to \`${number}\`... now be nice and **continue**!`)
+                .setFooter({text: `User can only say one number at a time, and it must be number higher than before`})
+                .setColor("Red")
+                .setImage('https://media.tenor.com/N8EtjGRm_90AAAAM/vyx-furry.gif')
+            return message.reply({embeds: [fixed]})
+        } else {
+            if(isNaN(message.content)) return message.delete();
+            if(await getCurrentNumber(parseInt(message.content))){
+                const lastUser = await getLastUser();
+    
+                if(lastUser !== message.author.id){
+                    message.react('<a:nutbutton:1236762071601909911>')
+                    increaseNumber(message.author.id)
+                    const record = await updateRecord(parseInt(message.content))
+                    message.channel.setTopic(`Current number is ${message.content}. The record we have reached is ${record}!! :star:`)
+                } else {
+                    message.react('❌')
+                    resetNumber()
+                    message.reply({embeds: [reset]})
+                }
             } else {
                 message.react('❌')
                 resetNumber()
                 message.reply({embeds: [reset]})
             }
-        } else {
-            message.react('❌')
-            resetNumber()
-            message.reply({embeds: [reset]})
         }
+        
     }
 });
 
@@ -73,6 +87,10 @@ async function getLastUser(){
  */
 function increaseNumber(user){
     con.query(`UPDATE counting SET number=number+1, user='${user}'`);
+}
+
+function fixNumber(num){
+    con.query(`UPDATE counting SET number='${num}', user='102756256556519424'`)
 }
 
 /**
