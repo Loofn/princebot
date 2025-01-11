@@ -35,6 +35,18 @@ client.on('interactionCreate', async interaction => {
                         .setTitle(`Streak has been saved!`)
                         .setDescription(`${member} paid \`${splitId[1]}\` cumcoins to save the streak. You can now continue the game like there was no fail at all!`)
 
+                    const disabledButton = new ButtonBuilder()
+                        .setCustomId(`saveCountingStreak-${splitId[1]}`)
+                        .setLabel(`Save the streak (-${splitId[1]} cumcoins)`)
+                        .setEmoji('🙏')
+                        .setStyle(ButtonStyle.Success)
+                        .setDisabled(true);
+
+                    const row = new ActionRowBuilder()
+                        .setComponents(disabledButton);
+
+                    interaction.message.edit({embeds: [interaction.message.embeds[0]], components: [row]})
+
                     interaction.reply({embeds: [savedEmb]});
                 } else {
                     interaction.reply({content: `Game is going already... touche-`, ephemeral: true});
