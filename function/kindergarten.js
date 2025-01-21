@@ -21,6 +21,7 @@ async function greetNewKindergarteners(user){
         })
 
     await KGchannel.send({content: `${user}`, embeds: [embed]});
+    await user.send({embeds: [embed]}).catch();
 }
 
 module.exports = {
