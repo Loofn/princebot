@@ -48,6 +48,16 @@ async function isVIP(userId){
     }
 }
 
+async function isBooster(userId){
+    const guild = client.guilds.cache.get('1231299437519966269');
+    const member = await guild.members.fetch(userId, {force: true, cache: true});
+    if(member.roles.cache.get('1233470240646758431')){
+        return true;
+    } else {
+        return false;
+    }
+}
+
 async function isVerified(userId){
     const guild = client.guilds.cache.get('1231299437519966269');
     const member = await guild.members.fetch(userId, {force: true, cache: true});
@@ -64,5 +74,6 @@ module.exports = {
     isTrialMod,
     isStaff,
     isVIP,
+    isBooster,
     isVerified
 }
