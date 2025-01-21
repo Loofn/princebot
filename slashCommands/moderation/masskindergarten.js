@@ -67,7 +67,7 @@ module.exports = {
                 })
                 const embed = new EmbedBuilder()
                     .setTitle(`Some spring cleaning was done...`)
-                    .setDescription(`${member} was doing some spring cleaning and found some *creatures...* that were thrown into Kindergarten.\nTotal of \`${cleanedMemmbers.size}\` new residents were assigned there!!`)
+                    .setDescription(`${member} was doing some spring cleaning and found some *creatures...* that were thrown into Kindergarten.\nTotal of \`${cleanedMemmbers.length}\` new residents were assigned there!!`)
                     .setImage('https://64.media.tumblr.com/6a8c00ba4946962b6039fb806f8e6b53/tumblr_n0epokv1441s5s0umo1_500.gif')
                     .setColor("DarkButNotBlack");
 
