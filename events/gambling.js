@@ -130,7 +130,7 @@ client.on('interactionCreate', async interaction => {
                     const wonGame = new EmbedBuilder()
                         .setTitle(`${interaction.member.user.username} and dealer were both on the edge...`)
                         .setColor("Gold")
-                        .setThumbnail(`https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjNuN2Ixd2JscTZja3AyZXBxNTB2c2FsaGJ2a3gxa2tkNWo2YTB4diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PIdyzBZ8XiKQWfgwYk/giphy.gif`)
+                        .setThumbnail(`https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGlrYndiNjM0aHh6YTR2MTVpb2F3NDBtcTZwdTkwbTVkMmg1NmNpMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/y4Cu1f9QFs8K1XHFws/giphy.gif`)
                         .setDescription(`**You stayed!** 🖐️\n\nCurrent hand is: \`${currentHand}\`\nDealer's hand is: \`${dealerTotal}\`\nBet amount was: \`${betAmount} cumcoins\` <a:Lewd_Coom:1235063571868680243>\n\n**You won:** \`${betAmount} cumcoins\` <a:Lewd_Coom:1235063571868680243>`)
                     
                     interaction.message.edit({embeds: [wonGame], components: []}).then(() => {
