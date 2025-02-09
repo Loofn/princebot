@@ -42,12 +42,14 @@ module.exports = {
                 const unwantedRoleIds = [serverRoles.unverified, serverRoles.verified, serverRoles.jailrole]
 
                 for (const targetMember of targetMembers.values()) {
+                    if (targetMember.user.bot) continue;
+                    if (!targetMember.manageable) continue;
                     if (!targetMember.roles.cache.has(serverRoles.unverified) && 
                         !targetMember.roles.cache.has(serverRoles.jailrole) && 
                         !targetMember.roles.cache.has(serverRoles.verified) && 
                         targetMember.roles.cache.has(serverRoles.member)) {
                         
-                        if (targetMember.bot) continue;
+                        
                         await saveUserRoles(targetMember.id);
                         await targetMember.roles.set([serverRoles.unverified]);
                         const newTime = moment().add(24, 'hours').format('YYYY-MM-DD HH:mm:ss');

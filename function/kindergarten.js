@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const client = require('..');
 const moment = require('moment');
 const { getDominantColorFromURL } = require('./utils');
@@ -10,6 +10,15 @@ async function greetNewKindergarteners(user){
     const KGchannel = guild.channels.cache.get('1233466742148300984')
     const banDate = moment().add(24, 'hours').unix();
 
+    const ageverify = new ButtonBuilder()
+        .setCustomId('ageverifybtn')
+        .setLabel('Verify your age')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('🛩️')
+
+    const row = new ActionRowBuilder()
+        .addComponents(ageverify)
+
     const embed = new EmbedBuilder()
         .setTitle(`New kid arrived...`)
         .setDescription(`Please confirm your age or you will be removed automatically from the server in **24 hours!** (<t:${banDate}:R>)`)
@@ -20,8 +29,8 @@ async function greetNewKindergarteners(user){
             iconURL: guild.iconURL()
         })
 
-    await KGchannel.send({content: `${user}`, embeds: [embed]});
-    await user.send({embeds: [embed]}).catch();
+    await KGchannel.send({content: `${user}`, embeds: [embed], components: [row]});
+    //await user.send({embeds: [embed]}).catch();
 }
 
 module.exports = {

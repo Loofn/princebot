@@ -111,7 +111,7 @@ client.on('interactionCreate', async interaction => {
                 await thread.send({embeds: [verifyGuidelines], components: [row]});
                 con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}') ON DUPLICATE KEY UPDATE thread='${thread.id}'`);
 
-                await interaction.reply({content: `Your age verify has been opened in ${thread}!`, ephemeral: true})
+                await interaction.reply({content: `Your age verify has been opened in ${thread}!`, ephemeral: true}).catch(err => console.log(err))
             })
         }
         if(splitId[0] === 'acceptrules'){
