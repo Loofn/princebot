@@ -43,7 +43,9 @@ module.exports = {
 
             const ch = guild.channels.cache.get('1233947079123013632');
             ch.send({embeds: [embed]}).then(async (msg) => {
-                await interaction.reply({content: `Posted in: ${msg.url}`, embeds: [embed], ephemeral: true})
+                await interaction.reply({content: `Posted in: ${msg.url}`, embeds: [embed], ephemeral: true}).catch(err => {
+                    console.error('Failed to send interaction reply:', err);
+                });
             })
             
         } else {
