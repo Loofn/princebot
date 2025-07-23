@@ -33,9 +33,9 @@ client.on('interactionCreate', async interaction => {
             const hasBoosterRole = await isBooster(interaction.member.id);
             let winnings = betAmount;
             if(hasBoosterRole) {
-                winnings = winnings*1,75;
+                winnings = Math.floor(winnings + winnings * 1.75);
             } else {
-                winnings = winnings*1,25;
+                winnings = Math.floor(winnings + winnings * 1.25);
             }
 
             if(action === 'bjr'){
