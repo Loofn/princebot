@@ -25,22 +25,24 @@ module.exports = {
             con.query(`SELECT * FROM user_points ORDER BY points DESC`, async function (err, res){
             
                 let userslist = "";
-                let placements = [":one:", ":two:", ":three:", ":four:", ":five:"]
+                let placements = [":trophy::one:", ":two:", ":three:", ":four:", ":five:", ":six:"]
                 let count = 0;
                 for (let i = 0; i < res.length; i++) {
-                    let user = await guild.members.cache.get(res[i].user);
+                    let user = await guild.members.fetch(res[i].user).catch(() => undefined);
                     if(user === undefined) continue;
                     if (count === 5) break;
                     count++;
-                    userslist += `${placements[i]} ${user} \`${res[i].points} cumcoins\`\n`
+                    userslist += `${placements[count]} ${user} \`${res[i].points} cumcoins\`\n`
                 }
 
                 const embed = new EmbedBuilder()
                     .setDescription(`${userslist}`)
-                    .setColor("Gold")
-                    .setTitle(`Furry game leaderboard`)
+                    .setColor("#FFFFFF")
+                    .setTitle(`Cumcoins leaderboard`)
     
-                await interaction.reply({embeds: [embed]});
+                await interaction.reply({embeds: [embed]}).catch(err => {
+                    console.error('Failed to send interaction reply:', err);
+                });
             })
         } else {
             await interaction.reply({embeds: [mustVerify], ephemeral: true})

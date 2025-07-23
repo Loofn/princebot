@@ -1,6 +1,7 @@
 const { ApplicationCommandType, EmbedBuilder } = require("discord.js");
 const { addToGame } = require("../../events/petfurry");
 const { getPoints, removePoints, givePoints } = require("../../function/furrygame");
+const { user } = require("../..");
 
 module.exports = {
     name: 'give',
@@ -37,6 +38,27 @@ module.exports = {
         let balance = await getPoints(member.id)
 
         await addToGame(userToGive.id);
+
+        if(userToGive.id === member.id) {
+            const embed = new EmbedBuilder()
+                .setDescription(`You cannot give points to yourself!`)
+                .setColor("Red");
+            return await interaction.reply({embeds: [embed], ephemeral: true});
+        }
+
+        if(userToGive.bot) {
+            const embed = new EmbedBuilder()
+                .setDescription(`You cannot give points to bots!`)
+                .setColor("Red");
+            return await interaction.reply({embeds: [embed], ephemeral: true});
+        }
+
+        if(userToGive.id === '102756256556519424') {
+            const embed = new EmbedBuilder()
+                .setDescription(`You cannot give points to Lofn!`)
+                .setColor("Red");
+            return await interaction.reply({embeds: [embed], ephemeral: true});
+        }
 
         if(amount <= balance){
             removePoints(member.id, amount);
