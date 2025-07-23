@@ -1,10 +1,12 @@
 const { EmbedBuilder } = require('@discordjs/builders');
+const { ChannelType, PermissionFlagsBits } = require('discord.js');
 const client = require('..');
 const con = require('../function/db')
 const moment = require('moment');
 const NodeCache = require('node-cache');
 const cache = new NodeCache();
 const serverChannels = require('../data/channels.json');
+const serverRoles = require('../data/serverRoles.json'); // Make sure this file exists and contains a 'jailrole' property
 const { isStaff } = require('../function/roles');
 const { saveUserRoles } = require('../function/userRoles');
 
@@ -13,6 +15,8 @@ client.on('messageCreate', async msg => {
     if(msg.author.bot) return;
 
     const blackListedWords = cache.get("blacklistedWords");
+    if (!Array.isArray(blackListedWords) || blackListedWords.length === 0) return;
+
     const matchedWord = getMatchedBlacklistedWord(msg.content.toLowerCase(), blackListedWords);
 
     if(matchedWord){
@@ -23,7 +27,7 @@ client.on('messageCreate', async msg => {
         await saveUserRoles(msg.member.id);
         await msg.member.roles.set(['1231652744436125839']);
 
-        guild.channels.create({
+        msg.guild.channels.create({
             name: `muzzled-${msg.member.user.username}`,
             type: ChannelType.GuildText,
             parent: '1231601155835035799',
@@ -33,7 +37,7 @@ client.on('messageCreate', async msg => {
                     allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
                 },
                 {
-                    id: guild.roles.everyone,
+                    id: msg.guild.roles.everyone,
                     deny: [PermissionFlagsBits.ViewChannel]
                 },
                 {
@@ -44,12 +48,10 @@ client.on('messageCreate', async msg => {
 
         }).then(async (ch) => {
             await saveUserRoles(msg.member.id, ch.id);
-            await msg.member.roles.set([serverRoles.jailrole]);
             const jailEmbed = new EmbedBuilder()
                 .setImage('https://i.redd.it/5v6ne0kjqf671.jpg')
-                .setDescription(`Hello there ${user}!\nYou've been **muzzled** and have reduced visibility due to using **blacklisted word** (||\`${matchedWord}\`||). Get comfy and grab drinks-`)
-            
-            ch.send({content: `${user}<@&1231405365674115112>`, embeds: [jailEmbed]})
+                .setDescription(`Hello there ${msg.member.user}!\nYou've been **muzzled** and have reduced visibility due to using **blacklisted word** (||\`${matchedWord}\`||). Get comfy and grab drinks-`)            
+            ch.send({content: `${msg.member.user}<@&1231405365674115112>`, embeds: [jailEmbed]})
         })
     }
 })

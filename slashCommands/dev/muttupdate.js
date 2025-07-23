@@ -4,8 +4,8 @@ const {isAdmin} = require('../../function/roles');
 const { noPerms } = require('../../data/embeds');
 
 module.exports = {
-    name: 'muttupdate',
-    description: 'Update log for Mutt',
+    name: 'botupdate',
+    description: 'Update log for the bot',
     cooldown: 3000,
     type: ApplicationCommandType.ChatInput,
     options: [
@@ -38,7 +38,7 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setDescription(`## ${title}\n${string}`)
-                .setFooter({text: `Any issues with Mutt should be reported to Lofn!`, iconURL: guild.iconURL()})
+                .setFooter({text: `Any issues with the bot should be reported to Lofn!`, iconURL: guild.iconURL()})
                 .setAuthor({name: `Update done by ${member.user.username}`, iconURL: `${member.displayAvatarURL()}`})
 
             const ch = guild.channels.cache.get('1233947079123013632');
