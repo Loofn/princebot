@@ -1,6 +1,7 @@
-const { EmbedBuilder, ChannelType, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder, ChannelType, ButtonStyle, ButtonBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const client = require('..');
 const con = require('../function/db')
+const moment = require('moment');
 const {defaultAvatar} = require('../function/sus')
 const {isStaff} = require('../function/roles')
 const {noPerms} = require('../data/embeds');
@@ -12,6 +13,30 @@ const { getPoints, removePoints } = require('../function/furrygame');
 const { fixNumber } = require('./countingGame');
 
 client.on('interactionCreate', async interaction => {
+
+    if(interaction.isModalSubmit()){
+        const { customId } = interaction;
+
+        if(customId.startsWith('addTimeModal-')){
+            const userId = customId.split('-')[1];
+            const durationInput = interaction.fields.getTextInputValue(`durationInput-${userId}`);
+            if(isNaN(durationInput) || durationInput <= 0) {
+                return interaction.reply({ content: 'Please provide a valid number of hours.', ephemeral: true });
+            }
+            const duration = parseInt(durationInput);
+            if(duration > 24) {
+                return interaction.reply({ content: 'You can only add up to 24 hours at a time.', ephemeral: true });
+            }
+            const newTime = moment().add(durationInput, 'hours').format('YYYY-MM-DD HH:mm:ss');
+            con.query(`UPDATE kindergarten SET time = ? WHERE user = ?`, [newTime, userId], (err, res) => {
+                if(err) {
+                    console.error('Database error:', err);
+                    return interaction.reply({ content: 'An error occurred while updating the time.', ephemeral: true });
+                }
+                interaction.reply({ content: `:alarm: Added \`${durationInput}\` hours to the verification time for <@${userId}> by ${interaction.member}`});
+            });
+        }
+    }
 
     if(interaction.isButton()){
         const member = interaction.member;
@@ -130,8 +155,14 @@ client.on('interactionCreate', async interaction => {
                     .setStyle(ButtonStyle.Primary)
                     .setEmoji('✅')
 
+                const addTimeButton = new ButtonBuilder()
+                    .setCustomId(`addTime-${member.id}`)
+                    .setLabel(`Add time to verify`)
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('⏳')
+
                 const row = new ActionRowBuilder()
-                    .addComponents(verifyButton, deleteThread)
+                    .addComponents(verifyButton, deleteThread, addTimeButton)
 
                 const verifyGuidelines = new EmbedBuilder()
                     .setTitle(`Age Verification of ${member.user.username}`)
@@ -146,6 +177,25 @@ client.on('interactionCreate', async interaction => {
 
                 await interaction.reply({content: `Your age verify has been opened in ${thread}!`, ephemeral: true}).catch(err => console.log(err))
             })
+        }
+        if(splitId[0] === 'addTime'){
+            if(await isStaff(member.id)){
+                const verifyUser = await guild.members.cache.get(splitId[1]);
+
+                const modal = new ModalBuilder()
+                    .setCustomId(`addTimeModal-${verifyUser.id}`)
+                    .setTitle(`Add time to verify for ${verifyUser.user.username}`);
+
+                const durationInput = new TextInputBuilder()
+                    .setCustomId(`durationInput-${verifyUser.id}`)
+                    .setLabel(`Duration (in hours)`)
+                    .setStyle(TextInputStyle.Short);
+
+                const row = new ActionRowBuilder().addComponents(durationInput);
+                modal.addComponents(row);
+
+                await interaction.showModal(modal);
+            }
         }
         if(splitId[0] === 'acceptrules'){
             if(member.id === splitId[1]){

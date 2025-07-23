@@ -73,8 +73,14 @@ module.exports = {
                 .setStyle(ButtonStyle.Primary)
                 .setEmoji('✅')
 
+            const addTimeButton = new ButtonBuilder()
+                    .setCustomId(`addTime-${member.id}`)
+                    .setLabel(`Add time to verify`)
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('⏳')
+
             const row = new ActionRowBuilder()
-                .addComponents(verifyButton, deleteThread)
+                .addComponents(verifyButton, deleteThread, addTimeButton)
 
             const verifyGuidelines = new EmbedBuilder()
                 .setTitle(`Age Verification of ${member.user.username}`)
