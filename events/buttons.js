@@ -19,6 +19,39 @@ client.on('interactionCreate', async interaction => {
         const guild = interaction.member.guild;
         const splitId = customId.split('-');
 
+        if(splitId[0] === 'deleteVentMsg'){
+            const isStaffMember = await isStaff(member.id);
+            if(interaction.message.author.id === member.id || isStaffMember){
+                let embed = EmbedBuilder.from(interaction.message.embeds[0]);
+                const deleter = isStaffMember ? "moderator" : "user";
+                embed.setDescription(`This message has been deleted by ${deleter}.`);
+                embed.setColor("Red");
+                interaction.message.edit({embeds: [embed], components: []}).catch(err => console.error(err));
+                if (interaction.message.hasThread) {
+                    interaction.message.thread.delete().catch(err => console.error(err));
+                }
+
+                // Audit log for deleted vent message
+                const logChannel = interaction.guild.channels.cache.get(serverChannels.auditlogs);
+                if (logChannel) {
+                    const logEmbed = new EmbedBuilder()
+                        .setTitle('Venting Message Deleted')
+                        .setDescription(embed.data.description || 'No description')
+                        .setColor("Red")
+                        .addFields(
+                            isStaffMember
+                                ? { name: 'Deleted by', value: `${member} (${member.id})`, inline: true }
+                                : { name: 'Deleted by', value: `user`, inline: true },
+                            { name: 'Message ID', value: `${interaction.message.id}`, inline: true }
+                        )
+                        .setTimestamp();
+                    logChannel.send({ embeds: [logEmbed] }).catch(console.error);
+                }
+            } else {
+                await interaction.reply({content: `You are not permitted to delete this message!`, ephemeral: true});
+            }
+        }
+
         if(splitId[0] === 'saveCountingStreak'){
             const balance = await getPoints(member.id)
             console.log(balance)
