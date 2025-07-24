@@ -31,12 +31,7 @@ client.on('interactionCreate', async interaction => {
             const currentHand = parseInt(handMatch[2], 10);
 
             const hasBoosterRole = await isBooster(interaction.member.id);
-            let winnings = betAmount;
-            if(hasBoosterRole) {
-                winnings = Math.floor(winnings + winnings * 1.75);
-            } else {
-                winnings = Math.floor(winnings + winnings * 1.25);
-            }
+            let winnings = betAmount * 2;
 
             if(action === 'bjr'){
 
@@ -68,7 +63,7 @@ client.on('interactionCreate', async interaction => {
                 } else {
                     const newEmbed = new EmbedBuilder()
                     .setTitle(oldEmbed.title)
-                    .setFooter({text: `Winnings are x1.25 for regulars, and x1.75 for server boosters`, iconURL: interaction.guild.iconURL()})
+                    .setFooter({text: `Winnings are x2 the bet amount`, iconURL: interaction.guild.iconURL()})
                     .setDescription(`**You threw:** \`${newDice}\` :game_die:\nCurrent hand is: \`${newSum}\`\nBet amount: \`${betAmount} cumcoins\` <a:Lewd_Coom:1235063571868680243>`)
 
                     interaction.message.edit({embeds: [newEmbed]}).then(() => {

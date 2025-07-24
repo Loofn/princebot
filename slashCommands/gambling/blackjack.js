@@ -17,7 +17,8 @@ module.exports = {
             description: 'Choose how many cumcoins you want to bet',
             type: 4,
             required: false,
-            min_value: 1
+            min_value: 1,
+            max_value: 2000
         }
 
     ],
@@ -52,7 +53,7 @@ module.exports = {
         const gameEmbed = new EmbedBuilder()
             .setTitle(`Blackjack game of ${member.user.username}`)
             .setDescription(`Starting hand is: \`${sum(playerDie1, playerDie2)}\`\nBet amount: \`${betAmount} cumcoins\` <a:Lewd_Coom:1235063571868680243>\n\n**Good luck** :pray:`)
-            .setFooter({text: `Winnings are x1.25 for regulars, and x1.75 for server boosters`, iconURL: interaction.guild.iconURL()})
+            .setFooter({text: `Winnings are x2 the bet amount`, iconURL: interaction.guild.iconURL()})
 
         if(betAmount == 0){
             interaction.reply({embeds: [gameEmbed], components: [row]});
