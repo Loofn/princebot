@@ -318,5 +318,37 @@ client.on('interactionCreate', async interaction => {
                     })
             }
         }
+
+        if(splitId[0] === 'revert'){
+            if(!await isStaff(member.id)){
+                return await interaction.reply({content: `You are not permitted to revert cum count!`, ephemeral: true});
+            }
+
+            const userId = splitId[1];
+            const logChannel = guild.channels.cache.get('1397631559317586014');
+            const cumAmount = parseInt(splitId[3]);
+            const coins = parseInt(splitId[2]);
+
+            let embed = EmbedBuilder.from(interaction.message.embeds[0]);
+            embed.setDescription(`This count was reverted by moderator (rule breaking).`);
+            embed.setColor("Red")
+            embed.setImage(null);
+
+            // Revert the cum count
+            removePoints(userId, coins);
+            con.query(
+                `UPDATE cumcount SET count = count - 1, amount = amount - ? WHERE user = ?`,
+                [cumAmount, userId],
+                async (err, result) => {
+                    if (err) {
+                        console.error('Database error:', err);
+                        return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+                    }
+
+
+                    await interaction.reply({ content: `Cum count for <@${userId}> has been reverted.`, ephemeral: true });
+                }
+            );
+        }
     }
 })

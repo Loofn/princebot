@@ -1,4 +1,4 @@
-const { ApplicationCommandType, EmbedBuilder } = require("discord.js");
+const { ApplicationCommandType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const { options } = require("../..");
 const con = require('../../function/db');
 const { isVerified, isAdmin } = require("../../function/roles");
@@ -64,7 +64,7 @@ module.exports = {
                             // Prepare embed
                             let embed = new EmbedBuilder()
                                 .setTitle(`${member.displayName} came!`)
-                                .setDescription(`${member} has just let it loose, and produced roughly :milk: \`${cumAmount} fresh milk\`! They have ejaculated a total of **${currentCumCount + 1}** times.`)
+                                .setDescription(`${member} has just let it loose, and produced roughly :milk: \`${cumAmount} ml of fresh milk\`! They have ejaculated a total of **${currentCumCount + 1}** times.`)
                                 .setColor("#FFFFFF")
                                 .setThumbnail(member.displayAvatarURL({ dynamic: true }))
                                 .setFooter({ text: `You can cum too with command /icame`, iconURL: member.guild.iconURL() })
@@ -75,12 +75,22 @@ module.exports = {
                             }
 
                             // Send embed to log channel
-                            const logChannel = member.guild.channels.cache.get('1397631559317586014')
-                            await logChannel.send({ embeds: [embed] });
+                            
 
                             // Award cumcoins
                             const coins = image ? 10 : 5;
                             givePoints(userId, coins);
+
+                            const revertButton = new ButtonBuilder()
+                                .setCustomId(`revert-${userId}-${coins}-${cumAmount}`)
+                                .setLabel('Revert')
+                                .setStyle(ButtonStyle.Secondary)
+                                .setEmoji('🔄');
+
+                            const row = new ActionRowBuilder().addComponents(revertButton);
+
+                            const logChannel = member.guild.channels.cache.get('1397631559317586014')
+                            await logChannel.send({ embeds: [embed], components: [row] });
 
                             await interaction.reply({ content: `Your cum count has been increased! You received ${coins} cumcoins.`, ephemeral: true });
                         }
