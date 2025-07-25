@@ -10,6 +10,7 @@ const { sendFurry, fiftyPercentChance } = require('./petfurry');
 const { updateGagged } = require('./gagMsg');
 const { getUptime } = require('../function/uptime');
 const { sendInformation } = require('./ai');
+const awardCumRole = require('../function/awardroles');
 
 client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
@@ -21,6 +22,7 @@ client.on("ready", async () => {
     updateGagged()
     sendInformation()
     console.log("Started", getUptime().fromNow())
+    awardCumRole()
 
     // SHORTER INTERVAL -> 10 seconds
     setInterval(() => {
