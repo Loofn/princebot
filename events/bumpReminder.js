@@ -19,7 +19,14 @@ client.on('messageCreate', async msg => {
 
 async function checkBumping(){
     con.query(`SELECT * FROM timers WHERE name='bump'`, function (err, res){
-        if(res.length === 0) return;
+        if (err) {
+            console.error('Database error:', err);
+            return;
+        }
+        if (!res || res.length === 0){
+            console.error('No bump timers found');
+            return;
+        }
         if(moment().isAfter(res[0].time)){
             con.query(`DELETE FROM timers WHERE name='bump'`);
             const guild = client.guilds.cache.get('1231299437519966269');
