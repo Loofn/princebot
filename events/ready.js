@@ -11,6 +11,7 @@ const { updateGagged } = require('./gagMsg');
 const { getUptime } = require('../function/uptime');
 const { sendInformation } = require('./ai');
 const awardCumRole = require('../function/awardroles');
+const { postRedditEmbeds } = require('./redditPoster');
 
 client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
@@ -23,6 +24,8 @@ client.on("ready", async () => {
     sendInformation()
     console.log("Started", getUptime().fromNow())
     awardCumRole()
+    postRedditEmbeds(); // Start Reddit poster immediately
+    
 
     // SHORTER INTERVAL -> 10 seconds
     setInterval(() => {
@@ -31,8 +34,12 @@ client.on("ready", async () => {
         remindUnverified()
         checkCreatedChannels()
         removeUnverified()
-        
     }, 10000);
+
+    // LONGER INTERVAL -> 5 minutes
+    setInterval(() => {
+        postRedditEmbeds();
+    }, 300000);
 
     // LONGER INTERVAL -> 1 HOUR
     setInterval(() => {
@@ -46,5 +53,9 @@ client.on("ready", async () => {
             sendFurry()
         }
     }, 300000)
+
+    // Reddit poster interval (already set in redditPoster.js, but safe to require here)
+    // If you want to control the interval here, you can move the setInterval from redditPoster.js to here.
+
     console.log(`Logged in as ${client.user.tag}!`)
 })

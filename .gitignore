@@ -1,4 +1,6 @@
 data/proof
+data/redditPostQueue.json
+data/sentRedditPosts.json
 
 # Logs
 logs
