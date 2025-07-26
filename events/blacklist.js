@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('@discordjs/builders');
 const { ChannelType, PermissionFlagsBits } = require('discord.js');
 const client = require('..');
 const con = require('../function/db')
+const queryAsync = require('../function/queryAsync');
 const moment = require('moment');
 const NodeCache = require('node-cache');
 const cache = new NodeCache();
@@ -58,16 +59,12 @@ client.on('messageCreate', async msg => {
 
 
 async function fetchBlacklistedWords(){
-    
-    con.query(`SELECT * FROM blacklistwords`, function (err, res){
-        if(res.length > 0){
-
-            const blacklistedWords = res.map((row) => row.word.toLowerCase());
-
-            cache.set("blacklistedWords", blacklistedWords);
-            //console.log("Blacklisted words loaded into cache: ", blacklistedWords);
-        }
-    })
+    const res = await queryAsync(con, `SELECT * FROM blacklistwords`, []);
+    if(res.length > 0){
+        const blacklistedWords = res.map((row) => row.word.toLowerCase());
+        cache.set("blacklistedWords", blacklistedWords);
+        //console.log("Blacklisted words loaded into cache: ", blacklistedWords);
+    }
 }
 function updateCachePeriodically() {
     fetchBlacklistedWords();

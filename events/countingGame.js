@@ -1,6 +1,7 @@
 const { EmbedBuilder, ButtonStyle} = require('discord.js');
 const client = require('..');
 const con = require('../function/db');
+const queryAsync = require('../function/queryAsync');
 const { ButtonBuilder } = require('discord.js');
 const { ActionRowBuilder } = require('discord.js');
 const { givePoints } = require('../function/furrygame');
@@ -105,26 +106,22 @@ function rewardParticipants(channel, number){
  * @returns {Promise<Boolean>}
  */
 async function getCurrentNumber(num){
-    return new Promise((resolve, reject) => {
-        con.query(`SELECT * FROM counting`, function (err, res){
-            if(err){
-                reject(err)
-            }
-            let nextNumber = res[0].number + 1;
-            resolve(nextNumber === num);
-        })
-    })
+    try {
+        const res = await queryAsync(con, `SELECT * FROM counting`, []);
+        let nextNumber = res[0].number + 1;
+        return nextNumber === num;
+    } catch (err) {
+        throw err;
+    }
 }
 
 async function checkNumber(){
-    return new Promise((resolve, reject) => {
-        con.query(`SELECT * FROM counting`, function (err, res){
-            if(err) {
-                reject(err)
-            }
-            resolve(res[0].number)
-        })
-    })
+    try {
+        const res = await queryAsync(con, `SELECT * FROM counting`, []);
+        return res[0].number;
+    } catch (err) {
+        throw err;
+    }
 }
 
 /**
@@ -132,26 +129,24 @@ async function checkNumber(){
  * @returns {Promise<String>} Returns user ID of the last user
  */
 async function getLastUser(){
-    return new Promise((resolve, reject) => {
-        con.query(`SELECT * FROM counting`, function (err, res){
-            if(err){
-                reject(err)
-            }
-            resolve(res[0].user);
-        })
-    })
+    try {
+        const res = await queryAsync(con, `SELECT * FROM counting`, []);
+        return res[0].user;
+    } catch (err) {
+        throw err;
+    }
 }
 
 /**
  * 
  * @param {String} user 
  */
-function increaseNumber(user){
-    con.query(`UPDATE counting SET number=number+1, user='${user}'`);
+async function increaseNumber(user){
+    await queryAsync(con, `UPDATE counting SET number=number+1, user=?`, [user]);
 }
 
-function fixNumber(num){
-    con.query(`UPDATE counting SET number='${num}', user=NULL`)
+async function fixNumber(num){
+    await queryAsync(con, `UPDATE counting SET number=?, user=NULL`, [num]);
 }
 
 /**
@@ -159,25 +154,21 @@ function fixNumber(num){
  * @param {Integer} num 
  */
 async function updateRecord(num){
-    return new Promise((resolve, reject) => {
-        con.query(`SELECT * FROM counting`, function (err, res){
-            if(res[0].record < num){
-                con.query(`UPDATE counting SET record='${num}'`)
-                resolve(num);
-            } else {
-                resolve(res[0].record)
-            }
-        })
-    })
-    
+    const res = await queryAsync(con, `SELECT * FROM counting`, []);
+    if(res[0].record < num){
+        await queryAsync(con, `UPDATE counting SET record=?`, [num]);
+        return num;
+    } else {
+        return res[0].record;
+    }
 }
 
 /**
  * 
  * @param {String} user 
  */
-function resetNumber(){
-    con.query(`UPDATE counting SET number=0, user=NULL`);
+async function resetNumber(){
+    await queryAsync(con, `UPDATE counting SET number=0, user=NULL`, []);
 }
 
 module.exports = {

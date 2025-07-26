@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const client = require('..');
 const con = require('./db');
+const queryAsync = require('./queryAsync');
 const moment = require('moment');
 const serverRoles = require('../data/serverRoles.json')
 
@@ -34,26 +35,18 @@ async function checkEntrance(){
 
 async function checkEntranceAfterLeaving(userId){
     const guild = client.guilds.cache.get('1231299437519966269');
-    con.query(`SELECT * FROM users WHERE user='${userId}' AND isMember=0`, async function (err, res) {
-
-        if(res.length > 0){
-            const welcomeMsg = await guild.channels.cache.get('1231409498686623804').messages.fetch(res[0].joinMessage, {force: true}).catch(console.error);
-
-            if(welcomeMsg){
-                await welcomeMsg.delete();
-            }
+    const res = await queryAsync(con, `SELECT * FROM users WHERE user=? AND isMember=0`, [userId]);
+    if(res.length > 0){
+        const welcomeMsg = await guild.channels.cache.get('1231409498686623804').messages.fetch(res[0].joinMessage, {force: true}).catch(console.error);
+        if(welcomeMsg){
+            await welcomeMsg.delete();
         }
-    })
+    }
 }
 
 async function getWelcomeMsg(userId){
-    const res = await new Promise((resolve, reject) => {
-        const sql = `SELECT joinMessage FROM users WHERE user=?`;
-        con.query(sql, [userId], (err, res) => {
-            if (err) reject(err);
-            else return resolve(res);
-        });
-    });
+    const sql = `SELECT joinMessage FROM users WHERE user=?`;
+    const res = await queryAsync(con, sql, [userId]);
 }
 
 /**
