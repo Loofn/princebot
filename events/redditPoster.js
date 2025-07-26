@@ -5,11 +5,11 @@ const path = require('path');
 const client = require('..');
 // Persistent storage for sent post IDs
 const SENT_POSTS_FILE = path.join(__dirname, '../data/sentRedditPosts.json');
-let sentPostIds = [];
+let sentPostPermalinks = [];
 try {
-    sentPostIds = JSON.parse(fs.readFileSync(SENT_POSTS_FILE, 'utf8'));
+    sentPostPermalinks = JSON.parse(fs.readFileSync(SENT_POSTS_FILE, 'utf8'));
 } catch (e) {
-    sentPostIds = [];
+    sentPostPermalinks = [];
 }
 
 // Persistent queue for unsent posts
@@ -74,13 +74,17 @@ async function postRedditEmbeds() {
             const posts = await fetchRedditPosts(config.subreddit, config.type || 'hot', config.limit || 1);
             console.log(`RedditPoster: Fetched ${posts.length} posts from r/${config.subreddit}`);
             const imagePosts = posts.filter(post => post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.jpeg')));
-            // Only add posts that are not in sentPostIds and not already in the queue
+            // Only add posts that are not in sentPostPermalinks and not already in the queue
             for (const post of imagePosts) {
-                if (!sentPostIds.includes(post.id) && !postQueue.some(q => q.id === post.id)) {
+                const permalink = post.permalink ? post.permalink : `${config.subreddit}/${post.id}`;
+                if (!sentPostPermalinks.includes(permalink) && !postQueue.some(q => (q.permalink ? q.permalink : `${config.subreddit}/${q.id}`) === permalink)) {
                     postQueue.push(post);
                 }
             }
-            console.log(`RedditPoster: Added ${imagePosts.filter(post => !sentPostIds.includes(post.id) && !postQueue.some(q => q.id === post.id)).length} new image posts to queue from r/${config.subreddit}`);
+            console.log(`RedditPoster: Added ${imagePosts.filter(post => {
+                const permalink = post.permalink ? post.permalink : `${config.subreddit}/${post.id}`;
+                return !sentPostPermalinks.includes(permalink) && !postQueue.some(q => (q.permalink ? q.permalink : `${config.subreddit}/${q.id}`) === permalink);
+            }).length} new image posts to queue from r/${config.subreddit}`);
         } catch (err) {
             console.error(`Reddit fetch/post error for r/${config.subreddit}:`, err);
         }
@@ -105,7 +109,8 @@ async function postRedditEmbeds() {
                 .setTimestamp(new Date(post.created_utc * 1000));
             embed.setImage(post.url);
             await channel.send({ embeds: [embed] });
-            sentPostIds.push(post.id);
+            const permalink = post.permalink ? post.permalink : `${post.subreddit}/${post.id}`;
+            sentPostPermalinks.push(permalink);
         } catch (e) {
             console.error('RedditPoster: Failed to send post:', e);
         }
@@ -114,7 +119,7 @@ async function postRedditEmbeds() {
     postQueue = postQueue.slice(postsToSend.length);
     try {
         fs.writeFileSync(QUEUE_FILE, JSON.stringify(postQueue, null, 2));
-        fs.writeFileSync(SENT_POSTS_FILE, JSON.stringify(sentPostIds, null, 2));
+        fs.writeFileSync(SENT_POSTS_FILE, JSON.stringify(sentPostPermalinks, null, 2));
     } catch (e) {
         console.error('RedditPoster: Failed to update queue or sent posts:', e);
     }
