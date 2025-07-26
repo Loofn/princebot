@@ -1,0 +1,14 @@
+[
+    {
+        "id": "item1",
+        "name": "Golden Sock",
+        "description": "A legendary sock that increases your luck.",
+        "price": 100
+    },
+    {
+        "id": "item2",
+        "name": "Mystery Box",
+        "description": "Contains a random surprise.",
+        "price": 50
+    }
+]
