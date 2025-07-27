@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
     "@dqbd/tiktoken": "^1.0.15",
     "ascii-table": "^0.0.9",
     "discord.js": "^14.14.1",
