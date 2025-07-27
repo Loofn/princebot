@@ -32,6 +32,16 @@ module.exports = {
         }
     ],
     run: async (client, interaction) => {
+        // Check if user is currently timed out from using icame
+        const timeoutRes = await queryAsync(con, `SELECT * FROM cumcount_timeout WHERE user=? AND expires > ?`, [userId, now]);
+        if (timeoutRes.length > 0) {
+            const remaining = Math.ceil((timeoutRes[0].expires - now) / 60000);
+            const embed = new EmbedBuilder()
+                .setTitle('Horni jail!')
+                .setDescription(`You are currently timed out from using /icame for another ${remaining} minute(s). *Maybe touch some grass?*`)
+                .setColor('#FF0000');
+            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         const { member, options } = interaction;
         const userId = member.id;
         const image = options.getAttachment('image');
