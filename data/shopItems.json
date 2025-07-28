@@ -1,14 +1,73 @@
 [
     {
-        "id": "item1",
-        "name": "Golden Sock",
-        "description": "A legendary sock that increases your luck.",
-        "price": 100
+        "id": "padlock",
+        "name": "Padlock",
+        "description": "A padlock that protects you from robbers for 12 hours.",
+        "price": 1000,
+        "max_amount": 3,
+        "rarity": "rare",
+        "emoji_name": "padlock",
+        "usable": true,
+        "use_type": "protection",
+        "effects": {
+            "protection_duration": 43200000,
+            "protection_type": "robbery"
+        },
+        "use_message": "🔒 You used a **Padlock**! You are now protected from robbery for 12 hours."
     },
     {
-        "id": "item2",
-        "name": "Mystery Box",
-        "description": "Contains a random surprise.",
-        "price": 50
+        "id": "fishingpole",
+        "name": "Fishing Pole",
+        "description": "A sturdy fishing pole for catching fish.",
+        "price": 100,
+        "max_amount": 1,
+        "rarity": "common",
+        "emoji_name": "fishing_pole",
+        "usable": false,
+        "use_type": "tool",
+        "effects": {
+            "fishing_boost": 1.2
+        }
+    },
+    {
+        "id": "fishingbait",
+        "name": "Fishing Bait",
+        "description": "Bait for fishing, increases your chances of catching fish.",
+        "price": 50,
+        "max_amount": 5,
+        "rarity": "common",
+        "emoji_name": "fishing_bait",
+        "usable": true,
+        "use_type": "consumable",
+        "effects": {
+            "fishing_luck_boost": 1.5,
+            "duration": 3600000
+        },
+        "use_message": "🎣 You used **Fishing Bait**! Your fishing luck is increased for 1 hour."
+    },
+    {
+        "id": "fishingrod",
+        "name": "Fishing Rod",
+        "description": "A high-quality fishing rod for serious anglers.",
+        "price": 1000,
+        "max_amount": 1,
+        "rarity": "uncommon",
+        "emoji_name": "fishing_rod",
+        "usable": false,
+        "use_type": "tool",
+        "effects": {
+            "fishing_boost": 1.8,
+            "rare_catch_chance": 0.15
+        }
+    },
+    {
+        "id": "potato",
+        "name": "Potato",
+        "description": "A simple potato.",
+        "price": 1000000,
+        "max_amount": 10,
+        "rarity": "legendary",
+        "emoji_name": "potato",
+        "usable": false
     }
 ]

@@ -12,9 +12,19 @@ const { getUptime } = require('../function/uptime');
 const { sendInformation } = require('./ai');
 const awardCumRole = require('../function/awardroles');
 const { postRedditEmbeds } = require('./redditPoster');
+const { listApplicationEmojiNames, initializeEmojiSystem } = require('../function/applicationEmojis');
+const { initializeInventorySystem } = require('../function/inventorySchema');
+
 
 client.on("ready", async () => {
     client.user.setActivity('furry booty', { type: ActivityType.Watching});
+    
+    // Initialize emoji system
+    initializeEmojiSystem(client);
+    
+    // Initialize inventory system
+    await initializeInventorySystem();
+    
     updateCachePeriodically()
     checkCreatedChannels()
     await checkEntrance()
@@ -58,4 +68,18 @@ client.on("ready", async () => {
     // If you want to control the interval here, you can move the setInterval from redditPoster.js to here.
 
     console.log(`Logged in as ${client.user.tag}!`)
+
+    async function initializeBotEmojis(client) {
+        try {
+            const clientId = client.application.id;
+            const token = process.env.TOKEN;
+            
+            // List available emojis
+            const emojiNames = await listApplicationEmojiNames(clientId, token);
+            console.log(`✅ Loaded ${emojiNames.length} application emojis:`, emojiNames);
+            
+        } catch (error) {
+            console.error('❌ Failed to load application emojis:', error);
+        }
+    }
 })
