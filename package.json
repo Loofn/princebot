@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/rest": "^2.5.1",
     "@discordjs/voice": "^0.18.0",
     "@dqbd/tiktoken": "^1.0.15",
     "ascii-table": "^0.0.9",
+    "discord-api-types": "^0.38.17",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
     "emoji-regex": "^10.3.0",
