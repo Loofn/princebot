@@ -53,7 +53,10 @@ module.exports = {
 
 async function viewShop(client, interaction) {
     const shopPath = path.join(__dirname, '../../data/shopItems.json');
-    const shopItems = JSON.parse(fs.readFileSync(shopPath, 'utf8'));
+    const allItems = JSON.parse(fs.readFileSync(shopPath, 'utf8'));
+    
+    // Filter out items that are not buyable (buyable defaults to true if not specified)
+    const shopItems = allItems.filter(item => item.buyable !== false);
     
     // Get application emojis for shop items (no need to pass client/token!)
     const emojiNames = shopItems.map(item => item.emoji_name || item.id);
