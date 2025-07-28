@@ -1,7 +1,17 @@
 const { ApplicationCommandType } = require("discord.js");
 const { EmbedBuilder } = require('discord.js');
 const con = require('../../function/db');
-const { isVerified } = require("../../function/roles");
+const { isVerified, isStaff } = require("../../function/roles");
+const { auditlogs } = require('../../data/channels.json');
+
+// Helper function to format amount (convert ml to liters if >= 1000ml)
+function formatAmount(amount) {
+    if (amount >= 1000) {
+        const liters = (amount / 1000).toFixed(2);
+        return `${liters} L`;
+    }
+    return `${amount} ml`;
+}
 
 module.exports = {
     name: 'cumcount',
@@ -67,7 +77,7 @@ module.exports = {
                     const userCumCount = res[0].count;
                     const userCumAmount = res[0].amount || 0; // Default to 0 if amount is not set
                     const embed = new EmbedBuilder()
-                        .setDescription(`:milk: You have cummed **${userCumCount}** times (\`${userCumAmount} ml\`).`)
+                        .setDescription(`:milk: You have cummed **${userCumCount}** times (\`${formatAmount(userCumAmount)}\`).`)
                         .setColor(0x00AE86);
 
                     return await interaction.reply({ embeds: [embed] });
@@ -83,7 +93,9 @@ module.exports = {
                         console.error('Database error:', err);
                         return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
                     }
-                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${row.amount || 0} ml\`)`).join('\n');
+                    let totalCumAmount = res.reduce((sum, row) => sum + (row.amount || 0), 0);
+                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
+                    leaderboard += `\n\n**Total milk amount:** \`${formatAmount(totalCumAmount)}\``;
                     if (!leaderboard) leaderboard = 'No users found in the leaderboard.';
 
                     const embed = new EmbedBuilder()
@@ -101,7 +113,7 @@ module.exports = {
                         console.error('Database error:', err);
                         return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
                     }
-                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${row.amount || 0} ml\`)`).join('\n');
+                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
                     if (!leaderboard) leaderboard = 'No users found in the leaderboard.';
 
                     const embed = new EmbedBuilder()
