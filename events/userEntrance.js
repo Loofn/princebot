@@ -5,6 +5,7 @@ const serverChannels = require("../data/channels.json");
 const { deleteVerifyThread } = require('../function/db/fetchAgeVerifyThread');
 const { checkCreatedChannels } = require('../function/cleanup');
 const { checkEntranceAfterLeaving, storeUsers } = require('../function/entrance');
+const { jailrole } = require('../data/serverRoles.json');
 
 client.on('guildMemberAdd', async (member) => {
 
@@ -71,3 +72,34 @@ client.on('guildMemberRemove', async (member) => {
     deleteVerifyThread(member.id);
     checkEntranceAfterLeaving(member.id);
 })
+
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    if(oldMember.user.bot) return;
+
+    // Check if the user has changed their username or avatar
+    if (oldMember.user.avatar !== newMember.user.avatar) {
+        if(newMember.roles.cache.has(jailrole)) {
+            
+            await restoreUserRoles(newMember.id);
+
+            const muzzledChannel = newMember.guild.channels.cache.find(ch => ch.name === `muzzled-${newMember.user.username}`);
+            if (muzzledChannel) {
+                const embed = new EmbedBuilder()
+                    .setTitle(`You have changed your avatar!`)
+                    .setDescription(`Hello ${newMember}, you have changed your avatar and are no longer considered suspicious. Your muzzled channel will be deleted soon by a moderator.`)
+                    .setColor("Green")
+
+                const deleteChannelBtn = new ButtonBuilder()
+                    .setCustomId('deleteChannel-staff')
+                    .setLabel('Delete muzzled channel')
+                    .setEmoji('🗑️')
+                    .setStyle(ButtonStyle.Secondary);
+
+                const rowBtn = new ActionRowBuilder()
+                    .addComponents(deleteChannelBtn);
+
+                await muzzledChannel.send({ content: `${newMember} <@&1248724861186998384>`, embeds: [embed], components: [rowBtn] });
+            }
+        }
+    }
+});
