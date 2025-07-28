@@ -1,9 +1,9 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
-const {isAdmin} = require('../../function/roles');
-const { noPerms } = require('../../data/embeds');
-const { isImageLink, getDominantColorFromURL } = require('../../function/utils');
-const con = require('../../function/db');
-const { sendFurry, addToGame } = require('../../events/petfurry');
+const {isAdmin} = require('../../function/roles.js');
+const { noPerms } = require('../../data/embeds.js');
+const { isImageLink, getDominantColorFromURL } = require('../../function/utils.js');
+const con = require('../../function/db.js');
+const { sendFurry, addToGame } = require('../../events/petfurry.js');
 const serverRoles = require('../../data/serverRoles.json')
 const {mustVerify} = require('../../data/embeds.js')
 

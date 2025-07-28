@@ -5,6 +5,7 @@ const moment = require('moment');
 const { getRandomInteger } = require("../../function/utils");
 const { sendFurry, addToGame } = require('../../events/petfurry');
 const { removePoints, givePoints, getPoints } = require("../../function/furrygame");
+const { isProtectedFromRobbery } = require("../../function/itemUtils");
 
 module.exports = {
     name: 'rob',
@@ -38,6 +39,14 @@ module.exports = {
                 .setColor("Red")
                 .setDescription(`<:Catto_Gesp:1236763359215620257> You are too tired to rob anyone yet...!`)
 
+            return await interaction.reply({embeds: [embed]})
+        }
+
+        if(await isProtectedFromRobbery(targetUser.id)){
+            const embed = new EmbedBuilder()
+                .setTitle(`Uh no...`)
+                .setColor("Red")
+                .setDescription(`<:Catto_Gesp:1236763359215620257> You cannot rob ${targetUser}, they are protected from robbery!`)
             return await interaction.reply({embeds: [embed]})
         }
 
