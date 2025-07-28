@@ -2,8 +2,8 @@
     {
         "id": "padlock",
         "name": "Padlock",
-        "description": "A padlock that protects you from robbers for 12 hours.",
-        "price": 1000,
+        "description": "A padlock that protects you from robbers for 5 days.",
+        "price": 2500,
         "max_amount": 3,
         "rarity": "rare",
         "emoji_name": "padlock",
@@ -11,16 +11,16 @@
         "usable": true,
         "use_type": "protection",
         "effects": {
-            "protection_duration": 43200000,
+            "protection_duration": 432000000,
             "protection_type": "robbery"
         },
-        "use_message": "🔒 You used a **Padlock**! You are now protected from robbery for 12 hours."
+        "use_message": "🔒 You used a **Padlock**! You are now protected from robbery for 5 days."
     },
     {
         "id": "lockpick",
         "name": "Lockpick",
         "description": "A tool for picking locks, useful for robbing others. Automatically used when robbing protected targets.",
-        "price": 2000,
+        "price": 4000,
         "max_amount": 5,
         "rarity": "uncommon",
         "emoji_name": "lockpick",
