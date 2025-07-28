@@ -14,6 +14,17 @@ async function isProtectedFromRobbery(userId) {
 }
 
 /**
+ * Check if user can use lockpick on themselves to break their own protection
+ * @param {string} userId - Discord user ID
+ * @returns {Promise<boolean>} True if user has both lockpick and protection
+ */
+async function canBreakOwnProtection(userId) {
+    const hasLockpick = await hasTool(userId, 'lockpick');
+    const hasProtection = await isProtectedFromRobbery(userId);
+    return hasLockpick && hasProtection;
+}
+
+/**
  * Get user's fishing boost from their tools and active effects
  * @param {string} userId - Discord user ID
  * @returns {Promise<number>} Fishing boost multiplier
@@ -120,6 +131,7 @@ async function exampleFishingBoost(userId) {
 
 module.exports = {
     isProtectedFromRobbery,
+    canBreakOwnProtection,
     getFishingBoost,
     getRareCatchChance,
     hasTool,

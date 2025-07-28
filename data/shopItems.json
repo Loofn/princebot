@@ -7,6 +7,7 @@
         "max_amount": 3,
         "rarity": "rare",
         "emoji_name": "padlock",
+        "fishable": true,
         "usable": true,
         "use_type": "protection",
         "effects": {
@@ -16,6 +17,21 @@
         "use_message": "🔒 You used a **Padlock**! You are now protected from robbery for 12 hours."
     },
     {
+        "id": "lockpick",
+        "name": "Lockpick",
+        "description": "A tool for picking locks, useful for robbing others. Automatically used when robbing protected targets.",
+        "price": 2000,
+        "max_amount": 5,
+        "rarity": "uncommon",
+        "emoji_name": "lockpick",
+        "fishable": true,
+        "usable": false,
+        "use_type": "tool",
+        "effects": {
+            "break_locks": true
+        }
+    },
+    {
         "id": "fishingpole",
         "name": "Fishing Pole",
         "description": "A sturdy fishing pole for catching fish.",
@@ -23,6 +39,7 @@
         "max_amount": 1,
         "rarity": "common",
         "emoji_name": "fishing_pole",
+        "fishable": false,
         "usable": false,
         "use_type": "tool",
         "effects": {
@@ -33,11 +50,12 @@
         "id": "fishingbait",
         "name": "Fishing Bait",
         "description": "Bait for fishing, increases your chances of catching fish.",
-        "price": 50,
+        "price": 800,
         "max_amount": 5,
         "rarity": "common",
         "emoji_name": "fishing_bait",
         "usable": true,
+        "fishable": false,
         "use_type": "consumable",
         "effects": {
             "fishing_luck_boost": 1.5,
@@ -53,6 +71,7 @@
         "max_amount": 1,
         "rarity": "uncommon",
         "emoji_name": "fishing_rod",
+        "fishable": false,
         "usable": false,
         "use_type": "tool",
         "effects": {
@@ -68,6 +87,85 @@
         "max_amount": 10,
         "rarity": "legendary",
         "emoji_name": "potato",
+        "fishable": false,
+        "usable": true,
+        "use_type": "consumable",
+        "effects": {
+            "cumcoins_reward": 50000,
+            "meme_power": true
+        },
+        "use_message": "🥔 You ate a **Legendary Potato**! You gained 50,000 cumcoins and feel the meme power coursing through you!"
+    },
+    {
+        "id": "salmon",
+        "name": "Salmon",
+        "description": "A delicious salmon fish.",
+        "price": 50,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "common",
+        "emoji_name": "salmon",
+        "fishable": true,
+        "usable": false
+    },
+    {
+        "id": "trout",
+        "name": "Trout",
+        "description": "A tasty trout fish.",
+        "price": 30,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "common",
+        "emoji_name": "trout",
+        "fishable": true,
+        "usable": false
+    },
+    {
+        "id": "catfish",
+        "name": "Catfish",
+        "description": "A large catfish.",
+        "price": 100,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "uncommon",
+        "emoji_name": "catfish",
+        "fishable": true,
+        "usable": false
+    },
+    {
+        "id": "goldfish",
+        "name": "Goldfish",
+        "description": "A shiny goldfish.",
+        "price": 1000,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "rare",
+        "emoji_name": "goldfish",
+        "fishable": true,
+        "usable": false
+    },
+    {
+        "id": "shark",
+        "name": "Shark",
+        "description": "A fierce shark.",
+        "price": 5000,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "epic",
+        "emoji_name": "shark",
+        "fishable": true,
+        "usable": false
+    },
+    {
+        "id": "whale",
+        "name": "Whale",
+        "description": "A massive whale.",
+        "price": 10000,
+        "buyable": false,
+        "max_amount": 100,
+        "rarity": "legendary",
+        "emoji_name": "whale",
+        "fishable": true,
         "usable": false
     }
 ]

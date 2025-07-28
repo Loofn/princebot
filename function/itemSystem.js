@@ -64,7 +64,7 @@ class ItemSystem {
                 return result;
             }
 
-            // Remove item from inventory (consumables only)
+            // Remove item from inventory (consumables only - lockpicks are handled in rob command)
             if (item.use_type === 'consumable') {
                 await this.consumeItem(userId, itemId);
             }
@@ -144,6 +144,29 @@ class ItemSystem {
             VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE expires_at = GREATEST(expires_at, ?)
         `, [userId, protectionType, expiresAt, expiresAt]);
+    }
+
+    /**
+     * Remove protection from user (used by lockpick)
+     * @param {string} userId - Discord user ID
+     * @param {string} protectionType - Type of protection to remove
+     * @returns {Promise<boolean>} True if protection was removed
+     */
+    async removeProtection(userId, protectionType) {
+        const result = await queryAsync(con, `
+            SELECT expires_at FROM user_protections 
+            WHERE user_id = ? AND protection_type = ? AND expires_at > ?
+        `, [userId, protectionType, Date.now()]);
+
+        if (result.length > 0) {
+            await queryAsync(con, `
+                DELETE FROM user_protections 
+                WHERE user_id = ? AND protection_type = ?
+            `, [userId, protectionType]);
+            return true;
+        }
+
+        return false;
     }
 
     /**
