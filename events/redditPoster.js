@@ -72,7 +72,6 @@ async function postRedditEmbeds() {
     for (const config of SUBREDDITS) {
         try {
             const posts = await fetchRedditPosts(config.subreddit, config.type || 'hot', config.limit || 1);
-            console.log(`RedditPoster: Fetched ${posts.length} posts from r/${config.subreddit}`);
             const imagePosts = posts.filter(post => post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.jpeg')));
             // Only add posts that are not in sentPostPermalinks and not already in the queue
             for (const post of imagePosts) {
@@ -81,10 +80,6 @@ async function postRedditEmbeds() {
                     postQueue.push(post);
                 }
             }
-            console.log(`RedditPoster: Added ${imagePosts.filter(post => {
-                const permalink = post.permalink ? post.permalink : `${config.subreddit}/${post.id}`;
-                return !sentPostPermalinks.includes(permalink) && !postQueue.some(q => (q.permalink ? q.permalink : `${config.subreddit}/${q.id}`) === permalink);
-            }).length} new image posts to queue from r/${config.subreddit}`);
         } catch (err) {
             console.error(`Reddit fetch/post error for r/${config.subreddit}:`, err);
         }
@@ -100,7 +95,6 @@ async function postRedditEmbeds() {
     const postsToSend = postQueue.slice(0, 5);
     for (const post of postsToSend) {
         try {
-            console.log(`RedditPoster: Posting image post: ${post.url}`);
             const embed = new EmbedBuilder()
                 .setTitle(post.title)
                 .setURL(`https://reddit.com${post.permalink}`)
