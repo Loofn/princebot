@@ -6,6 +6,8 @@ const { getRandomInteger } = require("../../function/utils");
 const { sendFurry, addToGame } = require('../../events/petfurry');
 const { removePoints, givePoints, getPoints } = require("../../function/furrygame");
 const { isProtectedFromRobbery } = require("../../function/itemUtils");
+const itemSystem = require('../../function/itemSystem');
+const queryAsync = require('../../function/queryAsync');
 
 module.exports = {
     name: 'rob',
@@ -43,11 +45,51 @@ module.exports = {
         }
 
         if(await isProtectedFromRobbery(targetUser.id)){
-            const embed = new EmbedBuilder()
-                .setTitle(`Uh no...`)
-                .setColor("Red")
-                .setDescription(`<:Catto_Gesp:1236763359215620257> You cannot rob ${targetUser}, they are protected from robbery!`)
-            return await interaction.reply({embeds: [embed]})
+            // Check if robber has a lockpick
+            const hasLockpick = await queryAsync(con, 
+                'SELECT quantity FROM user_inventories WHERE user_id = ? AND item_id = ? AND quantity > 0', 
+                [member.id, 'lockpick']
+            );
+
+            if (hasLockpick.length > 0) {
+                // Use lockpick to break target's protection
+                const breakResult = await itemSystem.removeProtection(targetUser.id, 'robbery');
+                
+                // Consume the lockpick
+                await queryAsync(con, `
+                    UPDATE user_inventories 
+                    SET quantity = quantity - 1 
+                    WHERE user_id = ? AND item_id = ? AND quantity > 0
+                `, [member.id, 'lockpick']);
+
+                // Remove lockpick entry if quantity reaches 0
+                await queryAsync(con, `
+                    DELETE FROM user_inventories 
+                    WHERE user_id = ? AND item_id = ? AND quantity <= 0
+                `, [member.id, 'lockpick']);
+
+                if (breakResult) {
+                    const embed = new EmbedBuilder()
+                        .setTitle(`🗝️ Lock Picked!`)
+                        .setColor("Orange")
+                        .setDescription(`You used a **Lockpick** to break ${targetUser}'s padlock protection! Your lockpick broke in the process. Try robbing again now!`)
+
+                    return await interaction.reply({embeds: [embed]})
+                } else {
+                    const embed = new EmbedBuilder()
+                        .setTitle(`🗝️ Lockpick Wasted!`)
+                        .setColor("Red")
+                        .setDescription(`You used a **Lockpick** but ${targetUser} didn't have any active protection. Your lockpick broke anyway!`)
+
+                    return await interaction.reply({embeds: [embed]})
+                }
+            } else {
+                const embed = new EmbedBuilder()
+                    .setTitle(`Uh no...`)
+                    .setColor("Red")
+                    .setDescription(`<:Catto_Gesp:1236763359215620257> You cannot rob ${targetUser}, they are protected from robbery! You need a **Lockpick** to break their protection.`)
+                return await interaction.reply({embeds: [embed]})
+            }
         }
 
         if(await hasCooldown(targetUser.id)){
