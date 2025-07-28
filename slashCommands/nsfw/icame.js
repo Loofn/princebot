@@ -32,6 +32,14 @@ module.exports = {
         }
     ],
     run: async (client, interaction) => {
+        
+        const { member, options } = interaction;
+        const userId = member.id;
+        const image = options.getAttachment('image');
+        const now = Date.now();
+        const cooldown = 60 * 60 * 1000; // 1 hour in ms
+        const dayMs = 24 * 60 * 60 * 1000;
+
         // Check if user is currently timed out from using icame
         const timeoutRes = await queryAsync(con, `SELECT * FROM cumcount_timeout WHERE user=? AND expires > ?`, [userId, now]);
         if (timeoutRes.length > 0) {
@@ -42,12 +50,6 @@ module.exports = {
                 .setColor('#FF0000');
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        const { member, options } = interaction;
-        const userId = member.id;
-        const image = options.getAttachment('image');
-        const now = Date.now();
-        const cooldown = 60 * 60 * 1000; // 1 hour in ms
-        const dayMs = 24 * 60 * 60 * 1000;
 
         try {
             // Check cooldown from last event
