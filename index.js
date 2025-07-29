@@ -1,6 +1,10 @@
 require('events').EventEmitter.prototype._maxListeners = 100;
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const fs = require('fs');
+const express = require('express');
+const bodyParser = require('body-parser');
+const { setupKofiWebhook } = require('./events/kofiWebhook');
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -17,6 +21,20 @@ const client = new Client({
 });
 
 require('dotenv').config();
+
+// Setup Express server for webhooks
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Setup Ko-Fi webhook
+setupKofiWebhook(app);
+
+// Start the webhook server
+const PORT = process.env.WEBHOOK_PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Webhook server running on port ${PORT}`);
+});
 
 client.commands = new Collection();
 client.aliases = new Collection();
