@@ -1,4 +1,4 @@
-const { ApplicationCommandType } = require('discord.js');
+const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, getVoiceConnection } = require('@discordjs/voice');
 const https = require('https');
 const fs = require('fs');
@@ -143,11 +143,13 @@ module.exports = {
 
             await interaction.reply({ content: `User ${user.tag} has been timed out from TTS for ${duration} minute(s). Reason: ${reason}`, ephemeral: true });
         
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle('TTS Timeout')
                 .setDescription(`User ${user} (\`${user.id}\`) has been timed out from TTS for ${duration} minute(s).`)
-                .addField('Reason', reason)
-                .addField('Moderator', `${member} (\`${member.id}\`)`)
+                .addFields(
+                    { name: 'Reason', value: reason },
+                    { name: 'Moderator', value: `${member} (\`${member.id}\`)` }
+                )
                 .setColor('#FF0000')
                 .setTimestamp();
 
@@ -162,18 +164,43 @@ if (!global.ttsVoiceHandlerAdded) {
     global.ttsVoiceHandlerAdded = true;
     const { Events } = require('discord.js');
     module.exports.voiceStateHandler = async (oldState, newState) => {
-        // Only run if user left a channel
+        // Only run if user left a channel (moved to different channel or disconnected)
         if (oldState.channelId && oldState.channelId !== newState.channelId) {
             const key = `${oldState.guild.id}_${oldState.channelId}`;
+            
+            // Check if this user was tracked for TTS in this channel
             if (ttsUsers[key] && ttsUsers[key].has(oldState.id)) {
+                console.log(`TTS user ${oldState.member?.displayName || oldState.id} left channel ${oldState.channelId}`);
                 ttsUsers[key].delete(oldState.id);
-                // Check if any tracked users remain
+                
+                // Get the channel to check remaining members
                 const channel = oldState.guild.channels.cache.get(oldState.channelId);
-                const stillTracked = channel && channel.members.some(m => ttsUsers[key].has(m.id));
-                if (!stillTracked) {
-                    // Disconnect bot from channel
+                if (channel) {
+                    // Check if any of the remaining users in the channel are TTS users
+                    const remainingTTSUsers = channel.members.filter(member => 
+                        ttsUsers[key] && ttsUsers[key].has(member.id) && !member.user.bot
+                    );
+                    
+                    console.log(`Remaining TTS users in channel: ${remainingTTSUsers.size}`);
+                    
+                    // If no TTS users remain in the channel, disconnect the bot
+                    if (remainingTTSUsers.size === 0) {
+                        console.log(`No TTS users remain in channel ${oldState.channelId}, disconnecting bot`);
+                        const connection = getVoiceConnection(oldState.guild.id);
+                        if (connection) {
+                            connection.destroy();
+                            console.log(`Bot disconnected from voice channel ${oldState.channelId}`);
+                        }
+                        // Clean up the tracking for this channel
+                        delete ttsUsers[key];
+                    }
+                } else {
+                    // Channel doesn't exist anymore, clean up
+                    console.log(`Channel ${oldState.channelId} no longer exists, cleaning up`);
                     const connection = getVoiceConnection(oldState.guild.id);
-                    if (connection) connection.destroy();
+                    if (connection) {
+                        connection.destroy();
+                    }
                     delete ttsUsers[key];
                 }
             }
