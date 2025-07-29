@@ -3,6 +3,7 @@ const client = require('..');
 const con = require('../function/db');
 const moment = require('moment');
 const serverRoles = require('../data/serverRoles.json')
+const { givePoints } = require('../function/furrygame');
 
 client.on('messageCreate', async msg => {
 
@@ -10,7 +11,8 @@ client.on('messageCreate', async msg => {
         if(msg.embeds.length > 0){
             if(msg.embeds[0].description.toLowerCase().includes("bump done")){
                 const bumper = msg.interaction.user;
-                msg.reply(`<:Furr_PuroPing:1232435896783999050> **Thank you for the bumping!** I will remind when you can bump again.`);
+                givePoints(bumper.id, 10);
+                msg.reply(`<:Furr_PuroPing:1232435896783999050> **Thank you for the bumping!** I will remind when you can bump again.\n\n<:cumcoin:1232435896783999050> You have received \`+10 cumcoins\` for bumping!`);
                 con.query(`INSERT INTO timers VALUES ('bump', '${moment().add(2, 'hours').format("YYYY-MM-DD HH:mm:ss")}', '${bumper.id}') ON DUPLICATE KEY UPDATE time='${moment().add(2, 'hours').format("YYYY-MM-DD HH:mm:ss")}'`)
             }
         }
