@@ -16,7 +16,7 @@ client.on('messageCreate', async message => {
         let currentGameNumber = await checkNumber()
         const saveButton = new ButtonBuilder()
             .setCustomId(`saveCountingStreak-${currentGameNumber}`)
-            .setLabel(`Save the streak (-${currentGameNumber} cumcoins)`)
+            .setLabel(`Save the streak (requires coupon)`)
             .setEmoji('🙏')
             .setStyle(ButtonStyle.Success)
 

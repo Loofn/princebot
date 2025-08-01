@@ -11,6 +11,7 @@ const serverChannels = require('../data/channels.json');
 const { saveUserRoles } = require('../function/userRoles');
 const { getPoints, removePoints } = require('../function/furrygame');
 const { fixNumber } = require('./countingGame');
+const { getUserInventory, removeItemFromUser, getItemQuantity } = require('../function/inventory');
 
 client.on('interactionCreate', async interaction => {
 
@@ -78,39 +79,42 @@ client.on('interactionCreate', async interaction => {
         }
 
         if(splitId[0] === 'saveCountingStreak'){
-            const balance = await getPoints(member.id)
-            console.log(balance)
-            console.log(splitId[1])
-            if(parseInt(balance) >= parseInt(splitId[1])){
-                const msgFetch = await interaction.channel.messages.fetch({limit: 1});
-                const latestMsg = msgFetch.first();
+            const userId = member.id;
+            const userInventory = await getUserInventory(userId);
+            const userItem = userInventory.find(i => i.item_id === "save_counting_coupon");
+            const userItemCount = userItem ? userItem.quantity : 0;
 
-                if(latestMsg.author.bot && !latestMsg.embeds[0].title.startsWith("Streak")){
-                    removePoints(member.id, parseInt(splitId[1]));
-                    fixNumber(parseInt(splitId[1]));
+            if(userItemCount <= 0){
+                return await interaction.reply({content: `You don't have a Save Counting Coupon!`, ephemeral: true});
+            }
 
-                    const savedEmb = new EmbedBuilder()
-                        .setTitle(`Streak has been saved!`)
-                        .setDescription(`${member} paid \`${splitId[1]}\` cumcoins to save the streak. You can now continue the game like there was no fail at all!`)
+            const msgFetch = await interaction.channel.messages.fetch({limit: 1});
+            const latestMsg = msgFetch.first();
 
-                    const disabledButton = new ButtonBuilder()
-                        .setCustomId(`saveCountingStreak-${splitId[1]}`)
-                        .setLabel(`Save the streak (-${splitId[1]} cumcoins)`)
-                        .setEmoji('🙏')
-                        .setStyle(ButtonStyle.Success)
-                        .setDisabled(true);
+            if(latestMsg.author.bot && !latestMsg.embeds[0].title.startsWith("Streak")){
+                // Use the coupon
+                await removeItemFromUser(userId, "save_counting_coupon", 1);
+                fixNumber(parseInt(splitId[1]));
 
-                    const row = new ActionRowBuilder()
-                        .setComponents(disabledButton);
+                const savedEmb = new EmbedBuilder()
+                    .setTitle(`Streak has been saved!`)
+                    .setDescription(`${member} used their coupon to save the streak. You can now continue the game like there was no fail at all!`)
 
-                    interaction.message.edit({embeds: [interaction.message.embeds[0]], components: [row]})
+                const disabledButton = new ButtonBuilder()
+                    .setCustomId(`saveCountingStreak-${splitId[1]}`)
+                    .setLabel(`Save the streak (used coupon)`)
+                    .setEmoji('🙏')
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(true);
 
-                    interaction.reply({embeds: [savedEmb]});
-                } else {
-                    interaction.reply({content: `Game is going already... touche-`, ephemeral: true});
-                }
+                const row = new ActionRowBuilder()
+                    .setComponents(disabledButton);
+
+                interaction.message.edit({embeds: [interaction.message.embeds[0]], components: [row]})
+
+                interaction.reply({embeds: [savedEmb]});
             } else {
-                interaction.reply({content: `Insufficient cumcoins!`, ephemeral: true})
+                interaction.reply({content: `Game is going already... touche-`, ephemeral: true});
             }
         }
 
@@ -197,6 +201,29 @@ client.on('interactionCreate', async interaction => {
                 await interaction.showModal(modal);
             }
         }
+        
+        if(splitId[0] === 'cancel' && splitId[1] === 'order'){
+            const orderId = splitId[2];
+            
+            // Update the embed to show cancelled status
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Order Cancelled')
+                .setColor('#dc3545')
+                .setDescription('Your cumcoins purchase has been cancelled.')
+                .addFields(
+                    { name: '🆔 Order ID', value: `\`${orderId}\``, inline: true },
+                    { name: '👤 User', value: member.displayName, inline: true }
+                )
+                .setTimestamp();
+
+            await interaction.update({
+                embeds: [embed],
+                components: []
+            });
+
+            console.log(`Order cancelled: ${orderId} by ${member.user.username} (${member.id})`);
+        }
+        
         if(splitId[0] === 'acceptrules'){
             if(member.id === splitId[1]){
                 await member.roles.add('1231406209613959208');
