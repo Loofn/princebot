@@ -7,7 +7,7 @@ const { updateCachePeriodically } = require('./blacklist');
 const { checkCreatedChannels } = require('../function/cleanup');
 const { checkEntrance, remindAboutRules } = require('../function/entrance');
 const { sendFurry, fiftyPercentChance } = require('./petfurry');
-const { updateGagged } = require('./gagMsg');
+const { updateGagged, checkGaggedTimer } = require('./gagMsg');
 const { getUptime } = require('../function/uptime');
 const { sendInformation } = require('./ai');
 const awardCumRole = require('../function/awardroles');
@@ -63,6 +63,14 @@ client.on("ready", async () => {
             sendFurry()
         }
     }, 300000)
+
+    // Check for expired gags every minute
+    setInterval(() => {
+        checkGaggedTimer();
+    }, 60000); // Check every 60 seconds
+
+    // Initial check for expired gags on startup
+    checkGaggedTimer();
 
     // Reddit poster interval (already set in redditPoster.js, but safe to require here)
     // If you want to control the interval here, you can move the setInterval from redditPoster.js to here.
