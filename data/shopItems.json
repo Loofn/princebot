@@ -97,6 +97,59 @@
         "use_message": "🥔 You ate a **Legendary Potato**! You gained 50,000 cumcoins and feel the meme power coursing through you!"
     },
     {
+        "id": "role_creation_coupon",
+        "name": "Role Creation Coupon",
+        "description": "A special coupon that gives you a 100% discount on creating a custom role. One-time use only.",
+        "price": 0,
+        "buyable": false,
+        "max_amount": 3,
+        "rarity": "legendary",
+        "emoji_name": "role_creation_coupon",
+        "fishable": false,
+        "usable": true,
+        "use_type": "coupon",
+        "effects": {
+            "discount_type": "role_creation",
+            "discount_percent": 100
+        },
+        "use_message": "🎫 You used a **Role Creation Coupon**! Your next custom role creation will be completely free!"
+    },
+    {
+        "id": "role_modification_coupon",
+        "name": "Role Modification Coupon", 
+        "description": "A special coupon that gives you a 100% discount on modifying your custom role. One-time use only.",
+        "price": 0,
+        "buyable": false,
+        "max_amount": 3,
+        "rarity": "epic",
+        "emoji_name": "role_modification_coupon",
+        "fishable": true,
+        "usable": true,
+        "use_type": "coupon",
+        "effects": {
+            "discount_type": "role_modification",
+            "discount_percent": 100
+        },
+        "use_message": "🎫 You used a **Role Modification Coupon**! Your next role modification will be completely free!"
+    },
+    {
+        "id": "save_counting_coupon",
+        "name": "Save Counting Coupon",
+        "description": "A special coupon that allows you to save server counting progress. One-time use only.",
+        "price": 1000,
+        "buyable": true,
+        "max_amount": 5,
+        "rarity": "uncommon",
+        "emoji_name": "save_counting_coupon",
+        "fishable": true,
+        "usable": true,
+        "use_type": "coupon",
+        "effects": {
+            "coupon_type": "save_counting"
+        },
+        "use_message": "📜 You used a **Save Counting Coupon**! Your server counting progress has been saved."
+    },
+    {
         "id": "salmon",
         "name": "Salmon",
         "description": "A delicious salmon fish.",
