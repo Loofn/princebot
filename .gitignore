@@ -1,6 +1,7 @@
 data/proof
 data/redditPostQueue.json
 data/sentRedditPosts.json
+database/*.sql
 
 # Logs
 logs
@@ -132,3 +133,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
