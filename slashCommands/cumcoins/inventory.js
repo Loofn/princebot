@@ -1,8 +1,7 @@
 const path = require('path');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getApplicationEmojis } = require('../../function/applicationEmojis');
-const queryAsync = require('../../function/queryAsync');
-const con = require('../../function/db');
+const { getUserInventory } = require('../../function/inventory');
 
 module.exports = {
     name: 'inventory',
@@ -17,7 +16,7 @@ module.exports = {
         const userId = interaction.user.id;
         
         // Get user's inventory with quantities
-        const rows = await queryAsync(con, 'SELECT item_id, quantity FROM user_inventories WHERE user_id = ? ORDER BY quantity DESC', [userId]);
+        const rows = await getUserInventory(userId);
         
         if (rows.length === 0) {
             const embed = new EmbedBuilder()
