@@ -1,12 +1,13 @@
 const NodeCache = require('node-cache');
 const client = require('..')
 const con = require('../function/db')
+const queryAsync = require('../function/queryAsync');
 const cache = new NodeCache();
 const moment = require('moment');
 const { WebhookClient } = require('discord.js');
 
 const blacklistChannels = ["1231601155835035799"]
-const muffledSpeech = ["Mmnnfhh... mmfffnnn...", "*Inaudible noise*", "MNNGHHHHNN!!?", "Mmmgnnngnnhhh...", "*Muffled moan* Mmnnhnnhn~", "*Muffled whimpering noises*"]
+const muffledSpeech = ["Mmnnfhh... mmfffnnn...", "*Inaudible noise*", "MNNGHHHHNN!!?", "Mmmgnnngnnhhh...", "*Muffled moan* Mmnnhnnhn~", "*Muffled whimpering noises*", "*Questions existence*", "Mmmnnn... mmmnnn..."] // Add more muffled speech variations as needed
 
 client.on('messageCreate', async message => {
 
@@ -51,38 +52,49 @@ async function getWebhook(channelId){
 }
 
 async function fetchGaggedUsers(){
-    
-    con.query(`SELECT * FROM user_gag`, function (err, res){
+    try {
+        const res = await queryAsync(con, 'SELECT * FROM user_gag');
         if(res.length > 0){
-
             const gaggedUsers = res.map((row) => row.user);
-
             cache.set("gaggedUsers", gaggedUsers);
             console.log("Gagged users:", gaggedUsers.length)
         } else {
             cache.del("gaggedUsers")
         }
-    })
+    } catch (error) {
+        console.error('Error fetching gagged users:', error);
+    }
 }
 
 async function updateGagged() {
     fetchGaggedUsers();
 }
 
-function checkGaggedTimer(){
-    con.query(`SELECT * FROM user_gag`, async function(err, res){
+async function checkGaggedTimer(){
+    try {
+        const res = await queryAsync(con, 'SELECT * FROM user_gag');
+        let removedCount = 0;
+        
         if(res.length > 0){
             for (let i = 0; i < res.length; i++) {
+                const gagEntry = res[i];
                 
-                if(moment().isAfter(res[i].date)){
-                    con.query(`DELETE FROM user_gag WHERE user='${res[i].user}'`);
+                // Check if the gag has expired
+                if(moment().isAfter(moment(gagEntry.date))){
+                    await queryAsync(con, 'DELETE FROM user_gag WHERE user = ?', [gagEntry.user]);
+                    removedCount++;
+                    console.log(`🔓 Removed expired gag for user: ${gagEntry.user}`);
                 }
-                
             }
 
-            updateGagged()
+            if(removedCount > 0) {
+                console.log(`🔓 Removed ${removedCount} expired gag(s)`);
+                updateGagged(); // Update the cache after removing expired gags
+            }
         }
-    })
+    } catch (error) {
+        console.error('Error checking gagged timer:', error);
+    }
 }
 
 module.exports = {
