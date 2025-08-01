@@ -30,9 +30,22 @@ module.exports = {
                 for (let i = 0; i < res.length; i++) {
                     let user = await guild.members.fetch(res[i].user).catch(() => undefined);
                     if(user === undefined) continue;
+                    if(user.id === '102756256556519424') continue; // Skip developer
                     if (count === 5) break;
                     count++;
-                    userslist += `${placements[count]} ${user} \`${res[i].points} cumcoins\`\n`
+                    // Points convert to millions, thousands, etc.
+                    const points = res[i].points;
+                    let displayPoints = points;
+                    let suffix = '';
+
+                    if (points >= 1000000) {
+                        displayPoints = (points / 1000000).toFixed(1);
+                        suffix = 'mil';
+                    } else if (points >= 1000) {
+                        displayPoints = (points / 1000).toFixed(1);
+                        suffix = 'k';
+                    }
+                    userslist += `${placements[count]} ${user} \`${displayPoints}${suffix} cumcoins\`\n`
                 }
 
                 const embed = new EmbedBuilder()
