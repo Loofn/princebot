@@ -1,9 +1,11 @@
+require('dotenv').config();
 require('events').EventEmitter.prototype._maxListeners = 100;
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { setupKofiWebhook } = require('./events/kofiWebhook');
+const { setupPaypalWebhook } = require('./events/paypalWebhook');
 
 const client = new Client({
     intents: [
@@ -20,15 +22,10 @@ const client = new Client({
     partials: [Partials.Channel, Partials.Message, Partials.User, Partials.GuildMember, Partials.Reaction, Partials.ThreadMember]
 });
 
-require('dotenv').config();
-
 // Setup Express server for webhooks
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Setup Ko-Fi webhook
-setupKofiWebhook(app);
 
 // Start the webhook server
 const PORT = process.env.WEBHOOK_PORT || 3000;
@@ -45,6 +42,13 @@ module.exports = client;
 
 fs.readdirSync('./handlers').forEach((handler) => {
     require(`./handlers/${handler}`)(client)
+});
+
+// Setup Ko-Fi and PayPal webhooks after client is ready
+client.once('ready', () => {
+    setupKofiWebhook(app, client);
+    setupPaypalWebhook(app, client);
+    console.log('Ko-Fi and PayPal webhooks setup complete');
 });
 
 client.login(process.env.TOKEN);
