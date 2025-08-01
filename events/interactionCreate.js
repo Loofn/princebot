@@ -8,15 +8,32 @@ const cooldown = new Collection();
 
 client.on('interactionCreate', async interaction => {
 	const slashCommand = client.slashCommands.get(interaction.commandName);
-		if (interaction.type == 4) {
-			if(slashCommand.autocomplete) {
-				const choices = [];
-				await slashCommand.autocomplete(interaction, choices)
+	
+	// Handle autocomplete interactions
+	if (interaction.isAutocomplete()) {
+		if(slashCommand && slashCommand.autocompleteRun) {
+			try {
+				await slashCommand.autocompleteRun(client, interaction);
+			} catch (error) {
+				console.error('Autocomplete error:', error);
 			}
 		}
-		if (!interaction.type == 2) return;
+		return;
+	}
 	
-		if(!slashCommand) return client.slashCommands.delete(interaction.commandName);
+	// Handle slash command interactions
+	if (!interaction.isChatInputCommand()) return;
+	
+	if(!slashCommand) return client.slashCommands.delete(interaction.commandName);
+		
+		// Check if command is disabled and user is not the developer
+		if(slashCommand.disabled && interaction.user.id !== '102756256556519424') {
+			const disabledEmbed = new EmbedBuilder()
+				.setDescription(`🚫 ${interaction.user}, This command is currently disabled for maintenance!`)
+				.setColor('Red')
+			return interaction.reply({ embeds: [disabledEmbed], ephemeral: true });
+		}
+		
 		try {
 			if(slashCommand.cooldown) {
 				if(cooldown.has(`slash-${slashCommand.name}${interaction.user.id}`)) return interaction.reply({ content: `You need to wait for <duration>`.replace('<duration>', ms(cooldown.get(`slash-${slashCommand.name}${interaction.user.id}`) - Date.now(), {long : true}) ) })
