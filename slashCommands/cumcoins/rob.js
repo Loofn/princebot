@@ -35,6 +35,18 @@ module.exports = {
 
         await addToGame(member.id);
 
+        if(targetUser.id === '102756256556519424'){ // Developer
+            const embed = new EmbedBuilder()
+                .setTitle(`Uh no...`)
+                .setColor("Red")
+                .setImage('https://media1.tenor.com/m/gyJB35224mgAAAAd/furry-police.gif')
+                .setDescription(`<:Catto_Gesp:1236763359215620257> You cannot rob the developer! They are too powerful! The police came and you need to pay a fine of 10% of your current cumcoins.`)
+
+            const fine = Math.floor(await getPoints(member.id) * 0.1);
+            await removePoints(member.id, fine);
+            return await interaction.reply({embeds: [embed]})
+        }
+
         if(await hasSelfCooldown(member.id)){
             const embed = new EmbedBuilder()
                 .setTitle(`Uh no...`)
