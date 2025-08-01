@@ -1,9 +1,8 @@
 const { EmbedBuilder } = require('discord.js');
-const client = require('..');
 
 const ANNOUNCEMENT_CHANNEL_ID = '1399583622452871228';
 
-function setupKofiWebhook(app) {
+function setupKofiWebhook(app, client) {
     // Health check endpoint
     app.get('/webhook-status', (req, res) => {
         res.json({ 
@@ -26,7 +25,7 @@ function setupKofiWebhook(app) {
 
             // Handle different Ko-Fi event types
             if (data.type === 'Donation' || data.type === 'Subscription') {
-                handleDonation(data);
+                handleDonation(data, client);
             }
 
             res.status(200).send('OK');
@@ -37,7 +36,7 @@ function setupKofiWebhook(app) {
     });
 }
 
-async function handleDonation(data) {
+async function handleDonation(data, client) {
     try {
         const channel = client.channels.cache.get(ANNOUNCEMENT_CHANNEL_ID);
         if (!channel) {
