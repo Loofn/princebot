@@ -114,9 +114,28 @@ module.exports = {
         if(interaction.options.getSubcommand() === 'check') {
 
             con.query(`SELECT * FROM user_points WHERE user='${member.id}'`, async function (err, res){
-                
+                if(err) {
+                    console.error('Database error:', err);
+                    return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+                }
+                if(res.length === 0) {
+                    return await interaction.reply({ content: 'You have no cumcoins yet! Start earning them by playing the game!', ephemeral: true });
+                }
+                // Points convert to millions, thousands, etc.
+                const points = res[0].points;
+                let displayPoints = points;
+                let suffix = 'cumcoins';
+
+                if (points >= 1000000) {
+                    displayPoints = (points / 1000000).toFixed(1);
+                    suffix = 'mil';
+                } else if (points >= 1000) {
+                    displayPoints = (points / 1000).toFixed(1);
+                    suffix = 'k';
+                }
+
                 const embed = new EmbedBuilder()
-                    .setDescription(`${member} has collected <a:coom:1235063571868680243> \`${res[0].points} cumcoins\``)
+                    .setDescription(`${member} has collected <a:coom:1235063571868680243> \`${displayPoints}${suffix} cumcoins\``)
                     .setColor("White")
 
                 await interaction.reply({embeds: [embed]});
