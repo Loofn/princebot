@@ -35,7 +35,7 @@ client.on('guildMemberAdd', async (member) => {
     .setTimestamp()
     .setThumbnail(member.displayAvatarURL())
     .setColor("#cd96f0")
-    .setDescription(`Hope you will enjoy your stay here, please don't forget to read <#1231299438069158001>.\nTo gain access press the big button underneath this message!\n\n:underage: Remember we are **strictly +18** server!!`)
+    .setDescription(`Hope you will enjoy your stay here, please don't forget to read <#1231299438069158001>.\nTo gain access press the big button underneath this message!\n\n🔞 Remember we are **strictly +18** server!!`)
 
     const entrance = member.guild.channels.cache.get('1231409498686623804');
     entrance.send({content: `${member}`, embeds: [welcome], components: [row]}).then(msg => {
