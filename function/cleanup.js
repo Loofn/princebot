@@ -6,12 +6,7 @@ async function checkCreatedChannels() {
     try {
         const guild = client.guilds.cache.get('1231299437519966269');
 
-        const res = await new Promise((resolve, reject) => {
-            con.query('SELECT * FROM muzzled', (err, res) => {
-                if (err) reject(err);
-                else resolve(res);
-            });
-        });
+        const [res] = await con.execute('SELECT * FROM muzzled');
 
         for (let i = 0; i < res.length; i++) {
             const member = await guild.members.fetch(res[i].user).catch(() => null);

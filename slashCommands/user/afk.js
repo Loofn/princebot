@@ -131,19 +131,23 @@ module.exports = {
 
             if(choice === 'afk-stop'){
                 await interaction.editReply({components: []})
-                con.query(`SELECT * FROM afk WHERE user='${member.id}'`, async function (err, res){
-                    if(res.length > 0){
-                        con.query(`DELETE FROM afk WHERE user='${member.id}'`)
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM afk WHERE user=?`, [member.id]);
+                    if(rows.length > 0){
+                        await con.execute(`DELETE FROM afk WHERE user=?`, [member.id]);
                         const embed = new EmbedBuilder()
                             .setTitle('They are back!')
                             .setThumbnail('https://d.furaffinity.net/art/lawsonia/1676560450/1673815579.lawsonia_yawn.gif')
-                            .setDescription(`${member} is back from their AFK journey. They were gone for \`${moment(res[0].date).fromNow(true)}\` with reason \`${res[0].reason}\`.`)
+                            .setDescription(`${member} is back from their AFK journey. They were gone for \`${moment(rows[0].date).fromNow(true)}\` with reason \`${rows[0].reason}\`.`)
                         
                             await comp.reply({embeds: [embed]})
                     } else {
                         await comp.reply({content: `You are not AFK.... dude... what`, ephemeral: true})
                     }
-                })
+                } catch (err) {
+                    console.error('Error stopping AFK:', err);
+                    await comp.reply({content: `An error occurred while stopping AFK.`, ephemeral: true})
+                }
             }
         } catch (e){
             console.log(e)
@@ -153,11 +157,8 @@ module.exports = {
 }
 
 async function startAFK(userId, reason){
-    return new Promise((resolve, reject) => {
-        const time = moment().format("YYYY-MM-DD HH:mm:ss")
-        const sql = `INSERT INTO afk VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reason=?, date=?`
-        con.query(sql, [userId, reason, time, reason, time])
-
-        resolve(true)
-    })
+    const time = moment().format("YYYY-MM-DD HH:mm:ss")
+    const sql = `INSERT INTO afk VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reason=?, date=?`
+    await con.execute(sql, [userId, reason, time, reason, time]);
+    return true;
 }

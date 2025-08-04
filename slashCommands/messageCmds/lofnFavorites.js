@@ -3,6 +3,7 @@ const { isMod, isAdmin, isVIP } = require('../../function/roles');
 const { noPerms } = require('../../data/embeds');
 const serverRoles = require('../../data/serverRoles.json');
 const serverChannels = require('../../data/channels.json');
+const queryAsync = require('../../function/queryAsync');
 const con = require('../../function/db');
 const moment = require('moment');
 const { getRandomInteger } = require('../../function/utils');
@@ -20,61 +21,82 @@ module.exports = {
         } = interaction; 
         const { guild } = member;
 
-        await interaction.deferReply({ephemeral: true})
+        // Check permissions first before deferring
+        if(!(await isAdmin(member.id))){
+            await interaction.reply({embeds: [noPerms], ephemeral: true});
+            return;
+        }
 
-        if(await isAdmin(member.id)){
+        await interaction.deferReply({ephemeral: true});
 
-                const targetMessage = interaction.targetMessage;
-                // DEBUG console.log(targetMessage);
-                con.query(`SELECT * FROM stats WHERE user='${targetMessage.author.id}' AND name='nutcount'`, async function (err, res){
-                    let nutcount = 1;
-                    if(res.length > 0){
-                        nutcount = await res[0].value+1;
-                        con.query(`UPDATE stats SET value=value+1 WHERE user='${targetMessage.author.id}' AND name='nutcount'`);
-                    } else {
-                        con.query(`INSERT INTO stats VALUES ('${targetMessage.author.id}', 'nutcount', '1')`)
-                    }
-                    
-                    let cumcoin = getRandomInteger(10)
-                    await addToGame(targetMessage.author.id);
-                    givePoints(targetMessage.author.id, cumcoin)
-                    let exposedMsg = new EmbedBuilder()
-                    .setAuthor({name: `${targetMessage.author.globalName} made Lofn nut`, iconURL: targetMessage.author.displayAvatarURL()})
-                    .setDescription(`💦💦 *Fuuuckkghhh...*\n*${targetMessage.author} has made Lofn nut ${nutcount} time(s)*\nThey were also awarded \`+${cumcoin} cumcoins\` <a:Lewd_Coom:1235063571868680243>\n\n${targetMessage.content}`)
-                    .setFooter({text: `Lofn has nutted to this one... ${moment(targetMessage.createdTimestamp).format("DD/MM/YYYY")}`})
-                    .addFields(
-                        {name: `Jump to message`, value: `${targetMessage.url}`, inline:true}
-                    )
-    
-                    const exposedCh = guild.channels.cache.get('1234183271215005887');
-
-                    if (targetMessage.attachments.size > 0 && !targetMessage.author.bot) {
-                        exposedMsg.setImage(targetMessage.attachments.first().url)
-                        exposedCh.send({embeds: [exposedMsg]}).then(() => {
-                            exposedCh.send({content: `${targetMessage.author}`}).then(msg => {
-                                setTimeout(() => {
-                                    msg.delete()
-                                }, 2000);
-                            })
-                        })
-
-                    } else {
-                        exposedCh.send({embeds: [exposedMsg]}).then(() => {
-                            exposedCh.send({content: `${targetMessage.author}`}).then(msg => {
-                                setTimeout(() => {
-                                    msg.delete()
-                                }, 2000);
-                            })
-                        })
-                    }              
-        
-                    
-                    await interaction.editReply({content: `DONE!`})
-                })
-                
+        try {
+            const targetMessage = interaction.targetMessage;
+            console.log(`Processing lofnFavorites for user ${targetMessage.author.id}`);
             
-        } else {
-            await interaction.editReply({embeds: [noPerms]})
+            // Get current nutcount for the user
+            console.log('Querying existing stats...');
+            const existingStats = await queryAsync(con, `
+                SELECT value FROM stats WHERE user = ? AND name = 'nutcount'
+            `, [targetMessage.author.id]);
+            
+            let nutcount = 1;
+            if (existingStats.length > 0) {
+                nutcount = existingStats[0].value + 1;
+                console.log(`Updating nutcount to ${nutcount}`);
+                // Update existing nutcount
+                await queryAsync(con, `
+                    UPDATE stats SET value = value + 1 
+                    WHERE user = ? AND name = 'nutcount'
+                `, [targetMessage.author.id]);
+            } else {
+                console.log('Creating new nutcount record');
+                // Insert new nutcount record
+                await queryAsync(con, `
+                    INSERT INTO stats (user, name, value) VALUES (?, 'nutcount', 1)
+                `, [targetMessage.author.id]);
+            }
+            
+            // Generate random cumcoin reward and give to user
+            const cumcoin = getRandomInteger(10);
+            console.log(`Giving ${cumcoin} cumcoins to user`);
+            await addToGame(targetMessage.author.id);
+            await givePoints(targetMessage.author.id, cumcoin);
+            
+            // Create the embed message
+            const exposedMsg = new EmbedBuilder()
+                .setAuthor({name: `${targetMessage.author.globalName} made Lofn nut`, iconURL: targetMessage.author.displayAvatarURL()})
+                .setDescription(`💦💦 *Fuuuckkghhh...*\n*${targetMessage.author} has made Lofn nut ${nutcount} time(s)*\nThey were also awarded \`+${cumcoin} cumcoins\` <a:Lewd_Coom:1235063571868680243>\n\n${targetMessage.content}`)
+                .setFooter({text: `Lofn has nutted to this one... ${moment(targetMessage.createdTimestamp).format("DD/MM/YYYY")}`})
+                .addFields(
+                    {name: `Jump to message`, value: `${targetMessage.url}`, inline: true}
+                );
+
+            const exposedCh = guild.channels.cache.get('1234183271215005887');
+
+            // Add image if message has attachments
+            if (targetMessage.attachments.size > 0 && !targetMessage.author.bot) {
+                exposedMsg.setImage(targetMessage.attachments.first().url);
+            }
+
+            console.log('Sending embed message...');
+            // Send the embed and ping user (deleted after 2 seconds)
+            await exposedCh.send({embeds: [exposedMsg]});
+            const pingMsg = await exposedCh.send({content: `${targetMessage.author}`});
+            setTimeout(() => {
+                pingMsg.delete().catch(console.error);
+            }, 2000);
+
+            console.log('Command completed successfully');
+            await interaction.editReply({content: `DONE!`});
+            
+        } catch (error) {
+            console.error('Error in lofnFavorites command:', error);
+            console.error('Stack trace:', error.stack);
+            try {
+                await interaction.editReply({content: 'An error occurred while processing the command.'});
+            } catch (replyError) {
+                console.error('Failed to reply with error message:', replyError);
+            }
         }
     }
 }

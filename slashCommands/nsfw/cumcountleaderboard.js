@@ -67,15 +67,12 @@ module.exports = {
 
         if (subcommand === 'check') {
             // Logic to check user's cum count
-            con.query(`SELECT * FROM cumcount WHERE user=?`, [member.id], async (err, res) => {
-                if (err) {
-                    console.error('Database error:', err);
-                    return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
-                }
+            try {
+                const [rows] = await con.execute(`SELECT * FROM cumcount WHERE user=?`, [member.id]);
 
-                if (res.length > 0) {
-                    const userCumCount = res[0].count;
-                    const userCumAmount = res[0].amount || 0; // Default to 0 if amount is not set
+                if (rows.length > 0) {
+                    const userCumCount = rows[0].count;
+                    const userCumAmount = rows[0].amount || 0; // Default to 0 if amount is not set
                     const embed = new EmbedBuilder()
                         .setDescription(`:milk: You have cummed **${userCumCount}** times (\`${formatAmount(userCumAmount)}\`).`)
                         .setColor(0x00AE86);
@@ -84,17 +81,17 @@ module.exports = {
                 } else {
                     return await interaction.reply({ content: 'You have not ejaculated any times yet... Get to jerking!', ephemeral: true });
                 }
-            });
+            } catch (err) {
+                console.error('Database error:', err);
+                return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+            }
         } else if (subcommand === 'leaderboard') {
             // Logic to show cum count leaderboard
             if (options.getString('sortby') === 'amount') {
-                con.query(`SELECT * FROM cumcount ORDER BY amount DESC LIMIT 10`, async (err, res) => {
-                    if (err) {
-                        console.error('Database error:', err);
-                        return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
-                    }
-                    let totalCumAmount = res.reduce((sum, row) => sum + (row.amount || 0), 0);
-                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM cumcount ORDER BY amount DESC LIMIT 10`);
+                    let totalCumAmount = rows.reduce((sum, row) => sum + (row.amount || 0), 0);
+                    let leaderboard = rows.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
                     leaderboard += `\n\n**Total milk amount:** \`${formatAmount(totalCumAmount)}\``;
                     if (!leaderboard) leaderboard = 'No users found in the leaderboard.';
 
@@ -106,14 +103,14 @@ module.exports = {
                         .setColor(0x00AE86);
 
                     return await interaction.reply({ embeds: [embed] });
-                });
+                } catch (err) {
+                    console.error('Database error:', err);
+                    return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+                }
             } else {
-                con.query(`SELECT * FROM cumcount ORDER BY count DESC LIMIT 10`, async (err, res) => {
-                    if (err) {
-                        console.error('Database error:', err);
-                        return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
-                    }
-                    let leaderboard = res.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM cumcount ORDER BY count DESC LIMIT 10`);
+                    let leaderboard = rows.map((row, index) => `${index + 1}. <@${row.user}> - ${row.count} times (\`${formatAmount(row.amount || 0)}\`)`).join('\n');
                     if (!leaderboard) leaderboard = 'No users found in the leaderboard.';
 
                     const embed = new EmbedBuilder()
@@ -124,7 +121,10 @@ module.exports = {
                         .setColor(0x00AE86);
 
                     return await interaction.reply({ embeds: [embed] });
-                });
+                } catch (err) {
+                    console.error('Database error:', err);
+                    return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+                }
             }
         } else if(subcommand === 'timeout') {
             // Logic to timeout a user from using icame command
@@ -139,40 +139,36 @@ module.exports = {
             const expires = now + timeoutDuration;
 
             // Check if user is already timed out in DB
-            con.query(`SELECT * FROM cumcount_timeout WHERE user=? AND expires > ?`, [user.id, now], async (err, res) => {
-                if (err) {
-                    console.error('Database error:', err);
-                    return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
-                }
-                if (res.length > 0) {
-                    const remaining = Math.ceil((res[0].expires - now) / 60000);
+            try {
+                const [rows] = await con.execute(`SELECT * FROM cumcount_timeout WHERE user=? AND expires > ?`, [user.id, now]);
+                if (rows.length > 0) {
+                    const remaining = Math.ceil((rows[0].expires - now) / 60000);
                     return await interaction.reply({ content: `User is already timed out for another ${remaining} minute(s).`, ephemeral: true });
                 }
                 // Insert or update timeout
-                con.query(`INSERT INTO cumcount_timeout (user, expires, reason, moderator) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE expires=?, reason=?, moderator=?`,
-                    [user.id, expires, reason, member.id, expires, reason, member.id], async (err2) => {
-                        if (err2) {
-                            console.error('Database error:', err2);
-                            return await interaction.reply({ content: 'An error occurred while setting the timeout.', ephemeral: true });
-                        }
-                        await interaction.reply({ content: `User ${user.tag} has been timed out from cum count for ${duration} minute(s). Reason: ${reason}`, ephemeral: true });
+                await con.execute(`INSERT INTO cumcount_timeout (user, expires, reason, moderator) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE expires=?, reason=?, moderator=?`,
+                    [user.id, expires, reason, member.id, expires, reason, member.id]);
+                
+                await interaction.reply({ content: `User ${user.tag} has been timed out from cum count for ${duration} minute(s). Reason: ${reason}`, ephemeral: true });
 
-                        const embed = new EmbedBuilder()
-                            .setTitle('Cum Count Timeout')
-                            .setDescription(`User ${user} (\`${user.id}\`) has been timed out from cum count for ${duration} minute(s).`)
-                            .addFields(
-                                { name: 'Reason', value: reason },
-                                { name: 'Moderator', value: `${member} (\`${member.id}\`)` }
-                            )
-                            .setColor('#FF0000')
-                            .setTimestamp();
+                const embed = new EmbedBuilder()
+                    .setTitle('Cum Count Timeout')
+                    .setDescription(`User ${user} (\`${user.id}\`) has been timed out from cum count for ${duration} minute(s).`)
+                    .addFields(
+                        { name: 'Reason', value: reason },
+                        { name: 'Moderator', value: `${member} (\`${member.id}\`)` }
+                    )
+                    .setColor('#FF0000')
+                    .setTimestamp();
 
-                        const auditlogChannel = member.guild.channels.cache.get(auditlogs);
-                        if (auditlogChannel) {
-                            await auditlogChannel.send({ embeds: [embed] });
-                        }
-                    });
-            });
+                const auditlogChannel = member.guild.channels.cache.get(auditlogs);
+                if (auditlogChannel) {
+                    await auditlogChannel.send({ embeds: [embed] });
+                }
+            } catch (err) {
+                console.error('Database error:', err);
+                return await interaction.reply({ content: 'An error occurred while setting the timeout.', ephemeral: true });
+            }
         }
     }
 };

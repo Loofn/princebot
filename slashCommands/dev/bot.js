@@ -34,8 +34,7 @@ module.exports = {
         const start = Date.now();
         let dbLatency;
         try {
-
-            await con.query('SELECT 1');
+            await con.execute('SELECT 1');
             dbLatency = Date.now() - start;
         } catch (error) {
             console.error('Database error:', error);

@@ -1,27 +1,24 @@
 const con = require('./db')
 
-function givePoints(userId, points){
-    con.query(`UPDATE user_points SET points=points+${points} WHERE user='${userId}'`)
+async function givePoints(userId, points){
+    await con.execute(`UPDATE user_points SET points=points+? WHERE user=?`, [points, userId]);
 }
 
-function removePoints(userId, points){
-    con.query(`UPDATE user_points SET points=points-${points} WHERE user='${userId}'`)
+async function removePoints(userId, points){
+    await con.execute(`UPDATE user_points SET points=points-? WHERE user=?`, [points, userId]);
 }
 
-function setPoints(userId, points){
-    con.query(`UPDATE user_points SET points=${points} WHERE user='${userId}'`)
+async function setPoints(userId, points){
+    await con.execute(`UPDATE user_points SET points=? WHERE user=?`, [points, userId]);
 }
 
 async function getPoints(userId){
-    return new Promise((resolve, reject) => {
-        con.query(`SELECT * FROM user_points WHERE user='${userId}'`, function(err, res){
-            if(res.length === 0){
-                resolve(0)
-            } else {
-                resolve(res[0].points)
-            }
-        })
-    })
+    const [rows] = await con.execute(`SELECT * FROM user_points WHERE user=?`, [userId]);
+    if(rows.length === 0){
+        return 0;
+    } else {
+        return rows[0].points;
+    }
 }
 
 module.exports = {

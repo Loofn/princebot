@@ -55,21 +55,20 @@ async function getWelcomeMsg(userId){
  * @param {String} userId ID of the stored user
  * @param {String} msgId ID of the entrance message
  */
-function storeUsers(userId, msgId) {
+async function storeUsers(userId, msgId) {
     const guild = client.guilds.cache.get('1231299437519966269');
 
     const member = guild.members.cache.get(userId);
     const joinDate = member ? moment(member.joinedAt).format("YYYY-MM-DD HH:mm:ss") : null;
     const isMember = member.roles.cache.get(serverRoles.member) ? 1 : 0;
     const sql = `INSERT INTO users (user, joinMessage, firstJoin, isMember) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE firstJoin = ?, isMember = ?`;
-    con.query(sql, [userId, msgId, joinDate, isMember, joinDate, isMember], (err, res) => {
-        if(err) {
-            console.error(err);
-            return false;
-        }
-
+    try {
+        await con.execute(sql, [userId, msgId, joinDate, isMember, joinDate, isMember]);
         return true;
-    });
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
 }
 
 async function storeOldUsers() {
@@ -102,8 +101,9 @@ async function remindAboutRules(){
         const joinDate = moment(member.joinedAt);
         const hours = moment().subtract(2, 'hours');
         if(moment(joinDate).isBefore(hours)){
-            con.query(`SELECT * FROM users WHERE user='${member.id}' AND ruleReminder=0 AND isMember=0`, function (err,res ){
-                if(res.length === 0){
+            try {
+                const [rows] = await con.execute(`SELECT * FROM users WHERE user=? AND ruleReminder=0 AND isMember=0`, [member.id]);
+                if(rows.length === 0){
                     const embed = new EmbedBuilder()
                         .setTitle(`POKE!!`)
                         .setThumbnail(guild.iconURL())
@@ -114,9 +114,11 @@ async function remindAboutRules(){
                     member.send({ embeds: [embed] }).catch(error => {
                         console.error(`Failed to send message to user ${member.id}:`, error);
                     });
-                    con.query(`UPDATE users SET ruleReminder=1 WHERE user='${member.id}'`)
+                    await con.execute(`UPDATE users SET ruleReminder=1 WHERE user=?`, [member.id]);
                 }
-            })
+            } catch (err) {
+                console.error('Error checking user for rule reminder:', err);
+            }
         }
         
     })

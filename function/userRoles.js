@@ -8,21 +8,21 @@ async function saveUserRoles(userId, chId){
     const roles = member.roles.cache.map((role) => role.id);
     const roleJson = JSON.stringify(roles);
     const sql = `INSERT INTO user_roles (user, roles, channel) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE roles = ?`
-    con.query(sql, [member.id, roleJson, chId, roleJson], (err) => {
-        if(err){
-            console.error('Error with DB:', err);
-        } else {
-            console.log(`${member.user.username} roles saved to DB:`, roleJson);
-        }
-    })
+    try {
+        await con.execute(sql, [member.id, roleJson, chId, roleJson]);
+        console.log(`${member.user.username} roles saved to DB:`, roleJson);
+    } catch (err) {
+        console.error('Error with DB:', err);
+    }
 }
 
 async function restoreUserRoles(userId){
     const guild = client.guilds.cache.get('1231299437519966269');
     const member = guild.members.cache.get(userId);
 
-    con.query(`SELECT * FROM user_roles WHERE user='${member.id}'`, function (err, res){
-        const rolesJson = res[0]?.roles;
+    try {
+        const [rows] = await con.execute(`SELECT * FROM user_roles WHERE user=?`, [member.id]);
+        const rolesJson = rows[0]?.roles;
 
         if(!rolesJson){
             console.log(`No roles found`)
@@ -33,10 +33,12 @@ async function restoreUserRoles(userId){
 
         member.roles.set(roles).catch((err) => console.error(err));
 
-        if(res[0].channel){
-            guild.channels.cache.get(res[0].channel).delete();
+        if(rows[0].channel){
+            guild.channels.cache.get(rows[0].channel).delete();
         }
-    })
+    } catch (err) {
+        console.error('Error restoring user roles:', err);
+    }
 }
 
 module.exports = {

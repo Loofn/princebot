@@ -29,13 +29,13 @@ client.on('interactionCreate', async interaction => {
                 return interaction.reply({ content: 'You can only add up to 24 hours at a time.', ephemeral: true });
             }
             const newTime = moment().add(durationInput, 'hours').format('YYYY-MM-DD HH:mm:ss');
-            con.query(`UPDATE kindergarten SET time = ? WHERE user = ?`, [newTime, userId], (err, res) => {
-                if(err) {
-                    console.error('Database error:', err);
-                    return interaction.reply({ content: 'An error occurred while updating the time.', ephemeral: true });
-                }
+            try {
+                await con.execute(`UPDATE kindergarten SET time = ? WHERE user = ?`, [newTime, userId]);
                 interaction.reply({ content: `:alarm: Added \`${durationInput}\` hours to the verification time for <@${userId}> by ${interaction.member}`});
-            });
+            } catch (err) {
+                console.error('Database error:', err);
+                return interaction.reply({ content: 'An error occurred while updating the time.', ephemeral: true });
+            }
         }
     }
 
@@ -177,7 +177,7 @@ client.on('interactionCreate', async interaction => {
                     .setFooter({text: `Follow the guidelines above so you know what you are expected to do`, iconURL: guild.iconURL()})
 
                 await thread.send({embeds: [verifyGuidelines], components: [row]});
-                con.query(`INSERT INTO ageverify VALUES ('${member.id}', '${thread.id}') ON DUPLICATE KEY UPDATE thread='${thread.id}'`);
+                await con.execute(`INSERT INTO ageverify VALUES (?, ?) ON DUPLICATE KEY UPDATE thread=?`, [member.id, thread.id, thread.id]);
 
                 await interaction.reply({content: `Your age verify has been opened in ${thread}!`, ephemeral: true}).catch(err => console.log(err))
             })
@@ -243,7 +243,7 @@ client.on('interactionCreate', async interaction => {
                 } else {
 
                     const entrance = interaction.member.guild.channels.cache.get('1231619809675051008');
-                    con.query(`UPDATE users SET isMember=1 WHERE user='${member.id}'`)
+                    await con.execute(`UPDATE users SET isMember=1 WHERE user=?`, [member.id]);
                     entrance.send({content: `<@&1233526354394218527>`, embeds: [welcomeMessage]}).then(msg => {
                         setTimeout(() => {
                             msg.delete().catch(console.error);
@@ -362,20 +362,18 @@ client.on('interactionCreate', async interaction => {
             embed.setImage(null);
 
             // Revert the cum count
-            removePoints(userId, coins);
-            con.query(
-                `UPDATE cumcount SET count = count - 1, amount = amount - ? WHERE user = ?`,
-                [cumAmount, userId],
-                async (err, result) => {
-                    if (err) {
-                        console.error('Database error:', err);
-                        return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
-                    }
-
-
-                    await interaction.reply({ content: `Cum count for <@${userId}> has been reverted.`, ephemeral: true });
-                }
-            );
+            await removePoints(userId, coins);
+            try {
+                await con.execute(
+                    `UPDATE cumcount SET count = count - 1, amount = amount - ? WHERE user = ?`,
+                    [cumAmount, userId]
+                );
+                
+                await interaction.reply({ content: `Cum count for <@${userId}> has been reverted.`, ephemeral: true });
+            } catch (err) {
+                console.error('Database error:', err);
+                return await interaction.reply({ content: 'An error occurred while accessing the database.', ephemeral: true });
+            }
         }
     }
 })

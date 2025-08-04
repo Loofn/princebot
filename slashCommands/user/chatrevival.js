@@ -19,8 +19,9 @@ module.exports = {
         } = interaction; 
         const { guild } = member;
 
-        con.query(`SELECT * FROM timers WHERE name='revive'`, async function (err, res){
-            if(res.length === 0 || moment().isAfter(res[0].time)){
+        try {
+            const [rows] = await con.execute(`SELECT * FROM timers WHERE name='revive'`);
+            if(rows.length === 0 || moment().isAfter(rows[0].time)){
 
                 const weatherHelsinki = await getWeather("Helsinki, Finland");
                 const channel = guild.channels.cache.get('1231619809675051008')
@@ -32,15 +33,18 @@ module.exports = {
                 channel.send({embeds: [embed], content: `@here`}).then(async (msg) => {
                     await interaction.reply({content: `Wake up call send to ${msg.url}`, ephemeral: true})
                 })
-                con.query(`INSERT INTO timers (name, time) VALUES ('revive', '${moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")}') ON DUPLICATE KEY UPDATE time='${moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")}'`)
+                await con.execute(`INSERT INTO timers (name, time) VALUES ('revive', ?) ON DUPLICATE KEY UPDATE time=?`, [moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss"), moment().add(6, 'hours').format("YYYY-MM-DD HH:mm:ss")]);
             } else {
                 
                 const embed = new EmbedBuilder()
-                    .setDescription(`You need to wait for \`${moment(res[0].time).toNow(true)}\` before reviving chat again!`)
+                    .setDescription(`You need to wait for \`${moment(rows[0].time).toNow(true)}\` before reviving chat again!`)
                     .setColor("Red")
 
                 await interaction.reply({embeds: [embed]});
             }
-        })
+        } catch (err) {
+            console.error('Error in chat revival:', err);
+            await interaction.reply({content: 'An error occurred while trying to revive chat.', ephemeral: true});
+        }
     }
 }

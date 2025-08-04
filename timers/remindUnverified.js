@@ -18,7 +18,7 @@ async function remindUnverified(){
                 .setCustomId('ageverifybtn')
                 .setLabel('Verify your age')
                 .setStyle(ButtonStyle.Primary)
-                .setEmoji('')
+                .setEmoji('✏️')
             const row = new ActionRowBuilder()
                 .addComponents(ageverify)
             const reminder = new EmbedBuilder()

@@ -4,30 +4,27 @@ const con = require('./db');
  * Updates the user_inventories table to support quantities if not already present
  */
 async function updateInventorySchema() {
-    return new Promise((resolve, reject) => {
+    try {
         // Check if quantity column exists
-        con.query(`SHOW COLUMNS FROM user_inventories LIKE 'quantity'`, (err, result) => {
-            if (err) {
-                console.error('Error checking inventory schema:', err);
-                return reject(err);
-            }
+        const [result] = await con.execute(`SHOW COLUMNS FROM user_inventories LIKE 'quantity'`);
+        
+        // If quantity column doesn't exist, add it
+        if (result.length === 0) {
+            await con.execute(`ALTER TABLE user_inventories ADD COLUMN quantity INT DEFAULT 1`);
+            console.log('✅ Added quantity column to user_inventories table');
             
-            // If quantity column doesn't exist, add it
-            if (result.length === 0) {
-                con.query(`ALTER TABLE user_inventories ADD COLUMN quantity INT DEFAULT 1`, (err2) => {
-                    if (err2) {
-                        console.error('Error adding quantity column:', err2);
-                        return reject(err2);
-                    }
-                    console.log('✅ Added quantity column to user_inventories table');
-                    resolve();
-                });
-            } else {
-                console.log('✅ Inventory schema is up to date');
-                resolve();
-            }
-        });
-    });
+            // Update existing records to have quantity 1
+            await con.execute(`UPDATE user_inventories SET quantity = 1 WHERE quantity IS NULL`);
+            console.log('✅ Updated existing inventory records with default quantities');
+        } else {
+            console.log('✅ Inventory schema is up to date');
+        }
+        
+        return true;
+    } catch (err) {
+        console.error('Error updating inventory schema:', err);
+        throw err;
+    }
 }
 
 /**
@@ -67,19 +64,17 @@ async function createItemSystemTables() {
         )`
     ];
 
-    for (const tableSQL of tables) {
-        await new Promise((resolve, reject) => {
-            con.query(tableSQL, (err) => {
-                if (err) {
-                    console.error('Error creating table:', err);
-                    return reject(err);
-                }
-                resolve();
-            });
-        });
+    try {
+        for (const tableSQL of tables) {
+            await con.execute(tableSQL);
+            console.log('✅ Table created successfully');
+        }
+        console.log('✅ All item system tables created successfully');
+        return true;
+    } catch (err) {
+        console.error('❌ Error creating item system tables:', err);
+        throw err;
     }
-    
-    console.log('✅ Item system tables ready');
 }
 
 /**
