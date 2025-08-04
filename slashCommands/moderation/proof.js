@@ -105,51 +105,58 @@ module.exports = {
                 fs.writeFileSync(filePath, buffer)
 
                 const sql = `INSERT INTO proof (user, imageName, description, moderator) VALUES (?, ?, ?, ?)`;
-                con.query(sql, [proofUserId.id, fileName, desc, member.id], async function (err, res){
-                    if(res){
+                try {
+                    const [result] = await con.execute(sql, [proofUserId.id, fileName, desc, member.id]);
 
-                        const done = new EmbedBuilder()
-                            .setColor("Yellow")
-                            .setTitle(`New proof added`)
-                            .setTimestamp()
-                            .setFooter({text: `Proof ID #${res.insertId}`, iconURL: guild.iconURL()})
-                            .setDescription(`New proof added to the database for ${proofUserId} by ${member}`)
-                            .setImage(attachment.url)
-                        await interaction.editReply({embeds: [done], ephemeral: true})
+                    const done = new EmbedBuilder()
+                        .setColor("Yellow")
+                        .setTitle(`New proof added`)
+                        .setTimestamp()
+                        .setFooter({text: `Proof ID #${result.insertId}`, iconURL: guild.iconURL()})
+                        .setDescription(`New proof added to the database for ${proofUserId} by ${member}`)
+                        .setImage(attachment.url)
+                    await interaction.editReply({embeds: [done], ephemeral: true})
 
-                        const auditLogs = guild.channels.cache.get(serverChannels.auditlogs);
-                        auditLogs.send({embeds: [done]});
-                    }
-                })
+                    const auditLogs = guild.channels.cache.get(serverChannels.moderation);
+                    auditLogs.send({embeds: [done]});
+                } catch (err) {
+                    console.error('Error adding proof:', err);
+                    await interaction.editReply({content: 'An error occurred while adding the proof.', ephemeral: true});
+                }
             }
 
             if(subCmd === 'delete'){
                 const proofId = options.getInteger('id');
                 await interaction.deferReply({ephemeral: true})
-                con.query(`SELECT * FROM proof WHERE id='${proofId}'`, async function (err, res){
-                    if(res.length > 0){
-                        const attachment = new AttachmentBuilder(`data/proof/${res[0].imageName}`)
-                        con.query(`DELETE FROM proof WHERE id=${id}`)
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM proof WHERE id=?`, [proofId]);
+                    if(rows.length > 0){
+                        const attachment = new AttachmentBuilder(`data/proof/${rows[0].imageName}`)
+                        await con.execute(`DELETE FROM proof WHERE id=?`, [proofId]);
                         await interaction.editReply({content: `Proof \`#${proofId}\` deleted`, files: [attachment]}).then(() => {
-                            fs.unlinkSync(`data/proof/${res[0].imageName}`)
+                            fs.unlinkSync(`data/proof/${rows[0].imageName}`)
                         })
                     } else {
                         await interaction.editReply({content: `No proof found with ID \`#${proofId}\``, ephemeral: true})
                     }
-                })
+                } catch (err) {
+                    console.error('Error deleting proof:', err);
+                    await interaction.editReply({content: 'An error occurred while deleting the proof.', ephemeral: true});
+                }
             }
 
             if(subCmd === 'list'){
                 await interaction.deferReply({ephemeral: true});
                 const proofUserId = options.getUser('user');
-                con.query(`SELECT * FROM proof WHERE user='${proofUserId.id}'`, async function (err, res){
-                    if(res.length > 0){
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM proof WHERE user=?`, [proofUserId.id]);
+                    if(rows.length > 0){
                         let proofs = "*Dates are in format DD/MM/YYYY*\n\n";
                         
 
-                        for (let i = 0; i < res.length; i++) {
-                            const member = client.users.cache.get(res[i].moderator)
-                            proofs += `${moment(res[i].date).format('DD/MM/YYYY')} \`#${res[i].id}\` by ${member}: ${res[i].description}\n\n`
+                        for (let i = 0; i < rows.length; i++) {
+                            const member = client.users.cache.get(rows[i].moderator)
+                            proofs += `${moment(rows[i].date).format('DD/MM/YYYY')} \`#${rows[i].id}\` by ${member}: ${rows[i].description}\n\n`
                             
                         }
 
@@ -163,32 +170,39 @@ module.exports = {
                     } else {
                         await interaction.editReply({content: `No proof found from user ${proofUserId}`, ephemeral: true})
                     }
-                })
+                } catch (err) {
+                    console.error('Error listing proofs:', err);
+                    await interaction.editReply({content: 'An error occurred while listing proofs.', ephemeral: true});
+                }
             }
 
             if(subCmd === 'show'){
                 await interaction.deferReply({ephemeral: true});
                 const proofId = options.getInteger('id');
-                con.query(`SELECT * FROM proof WHERE id='${proofId}'`, async function (err, res){
-                    if(res.length > 0){
-                        const proofUser = client.users.cache.get(res[0].user);
-                        const proofMod = client.users.cache.get(res[0].moderator);
-                        const attachment = new AttachmentBuilder(`data/proof/${res[0].imageName}`)
+                try {
+                    const [rows] = await con.execute(`SELECT * FROM proof WHERE id=?`, [proofId]);
+                    if(rows.length > 0){
+                        const proofUser = client.users.cache.get(rows[0].user);
+                        const proofMod = client.users.cache.get(rows[0].moderator);
+                        const attachment = new AttachmentBuilder(`data/proof/${rows[0].imageName}`)
                         const embed = new EmbedBuilder()
-                            .setTitle(`Proof #${res[0].id} of ${proofUser.username}`)
-                            .setDescription(`${res[0].description}`)
+                            .setTitle(`Proof #${rows[0].id} of ${proofUser.username}`)
+                            .setDescription(`${rows[0].description}`)
                             .addFields(
                                 {name: `Moderator`, value: `${proofMod}`, inline: true},
-                                {name: `Date`, value: `${moment(res[0].date).format("DD/MM/YYYY")}`, inline: true}
+                                {name: `Date`, value: `${moment(rows[0].date).format("DD/MM/YYYY")}`, inline: true}
                             )
                             .setColor("Blurple")
-                            .setImage(`attachment://${res[0].imageName}`)
+                            .setImage(`attachment://${rows[0].imageName}`)
 
                         await interaction.editReply({embeds: [embed], files: [attachment]});
                     } else {
                         await interaction.editReply({content: `No proof found with ID \`#${proofId}\``, ephemeral: true})
                     }
-                })
+                } catch (err) {
+                    console.error('Error showing proof:', err);
+                    await interaction.editReply({content: 'An error occurred while showing proof.', ephemeral: true});
+                }
             }
         } else {
             await interaction.reply({embeds: [noPerms], ephemeral: true})

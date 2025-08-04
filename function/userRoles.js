@@ -1,7 +1,7 @@
 const client = require("..");
 const con = require('../function/db')
 
-async function saveUserRoles(userId, chId){
+async function saveUserRoles(userId, chId = null){
     const guild = client.guilds.cache.get('1231299437519966269');
     const member = guild.members.cache.get(userId);
 

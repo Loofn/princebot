@@ -2,7 +2,7 @@ const { ApplicationCommandType } = require("discord.js");
 const { EmbedBuilder } = require('discord.js');
 const con = require('../../function/db');
 const { isVerified, isStaff } = require("../../function/roles");
-const { auditlogs } = require('../../data/channels.json');
+const serverChannels = require('../../data/channels.json');
 
 // Helper function to format amount (convert ml to liters if >= 1000ml)
 function formatAmount(amount) {
@@ -161,7 +161,7 @@ module.exports = {
                     .setColor('#FF0000')
                     .setTimestamp();
 
-                const auditlogChannel = member.guild.channels.cache.get(auditlogs);
+                const auditlogChannel = member.guild.channels.cache.get(serverChannels.moderation);
                 if (auditlogChannel) {
                     await auditlogChannel.send({ embeds: [embed] });
                 }

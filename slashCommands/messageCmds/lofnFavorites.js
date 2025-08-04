@@ -20,7 +20,7 @@ module.exports = {
             options, id, createdTimestamp 
         } = interaction; 
         const { guild } = member;
-
+        console.log(`Running lofnFavorites command for user ${member.id} in guild ${guildId}`);
         // Check permissions first before deferring
         if(!(await isAdmin(member.id))){
             await interaction.reply({embeds: [noPerms], ephemeral: true});
@@ -73,9 +73,21 @@ module.exports = {
 
             const exposedCh = guild.channels.cache.get('1234183271215005887');
 
-            // Add image if message has attachments
+            // Handle attachments properly - only set image for actual images
             if (targetMessage.attachments.size > 0 && !targetMessage.author.bot) {
-                exposedMsg.setImage(targetMessage.attachments.first().url);
+                const attachment = targetMessage.attachments.first();
+                const isImage = attachment.contentType && attachment.contentType.startsWith('image/');
+                
+                if (isImage) {
+                    exposedMsg.setImage(attachment.url);
+                } else {
+                    // For videos and other files, add them as a field instead
+                    exposedMsg.addFields({
+                        name: 'Attachment', 
+                        value: `[${attachment.name || 'File'}](${attachment.url})`,
+                        inline: true
+                    });
+                }
             }
 
             console.log('Sending embed message...');

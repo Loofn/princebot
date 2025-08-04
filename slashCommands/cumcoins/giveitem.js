@@ -71,6 +71,15 @@ module.exports = {
             });
         }
 
+        // Check if amount exceeds max_amount for the item
+        if (adminUse && amount <= item.max_amount) {
+            await addItemToUser(userToGive.id, itemId, amount);
+            return await interaction.reply({ 
+                content: `Successfully gave ${amount} of ${item.name} to ${userToGive.username}.`, 
+                ephemeral: false 
+            });
+        }
+
         // Check if the user has the item in their inventory
         const userInventory = await getUserInventory(userId);
         const userItem = userInventory.find(i => i.item_id === itemId);
@@ -81,14 +90,8 @@ module.exports = {
             });
         }
 
-        // Check if amount exceeds max_amount for the item
-        if (adminUse && amount <= item.max_amount) {
-            await giveItemToUser(userToGive.id, itemId, amount);
-            return await interaction.reply({ 
-                content: `Successfully gave ${amount} of ${item.name} to ${userToGive.username}.`, 
-                ephemeral: false 
-            });
-        } else if (amount > item.max_amount) {
+        
+        if (amount > item.max_amount) {
             return await interaction.reply({ 
                 content: `You can only give a maximum of ${item.max_amount} of this item.`, 
                 ephemeral: true 

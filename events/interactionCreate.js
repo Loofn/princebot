@@ -21,8 +21,8 @@ client.on('interactionCreate', async interaction => {
 		return;
 	}
 	
-	// Handle slash command interactions
-	if (!interaction.isChatInputCommand()) return;
+	// Handle slash command interactions (both chat input and context menu)
+	if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand() && !interaction.isUserContextMenuCommand()) return;
 	
 	if(!slashCommand) return client.slashCommands.delete(interaction.commandName);
 		

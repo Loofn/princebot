@@ -33,7 +33,7 @@ module.exports = {
                 .setColor("Greyple");
 
             addModlog(user.id, "JAIL", member.id);
-            const logchannel = guild.channels.cache.get(serverChannels.auditlogs)
+            const logchannel = guild.channels.cache.get(serverChannels.moderation)
             logchannel.send({embeds: [log]})
             interaction.reply({embeds: [embed], ephemeral: true})
             

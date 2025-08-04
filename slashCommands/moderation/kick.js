@@ -79,7 +79,7 @@ module.exports = {
                         {name: `Moderator`, value: `${member}`}
                     )
 
-                const logs = guild.channels.cache.get(serverChannels.auditlogs);
+                const logs = guild.channels.cache.get(serverChannels.moderation);
                 await logs.send({embeds: [log]})
                 await interaction.reply({embeds: [embed]})
              } else {

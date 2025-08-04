@@ -54,7 +54,7 @@ module.exports = {
         const { guild } = member;
 
         const subCmd = options.getSubcommand();
-        const logchannel = guild.channels.cache.get(serverChannels.auditlogs);
+        const logchannel = guild.channels.cache.get(serverChannels.moderation);
 
         if(subCmd === 'show'){
             if(isStaff(member.id)){

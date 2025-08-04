@@ -7,7 +7,7 @@ const serverChannels = require("../data/channels.json")
 client.on('voiceStateUpdate', async (oldState, newState) => {
     const user = newState.member || oldState.member;
     if (!user || user.user.bot) return;
-    const auditlog = (newState.guild || oldState.guild).channels.cache.get(serverChannels.auditlogs);
+    const auditlog = (newState.guild || oldState.guild).channels.cache.get(serverChannels.general);
     if (!auditlog) return;
 
     // Voice channel join/leave
@@ -156,7 +156,7 @@ client.on('messageUpdate', async (oldMsg, newMsg) => {
         .setColor("DarkNavy")
         .setDescription(`**__OLD:__** ${oldMsgFormat}\n\n**__NEW:__** ${newMsgFormat}`);
 
-    const auditlog = newMsg.guild.channels.cache.get(serverChannels.auditlogs)
+    const auditlog = newMsg.guild.channels.cache.get(serverChannels.general)
     auditlog.send({embeds: [editLog]})
 })
 
@@ -197,6 +197,6 @@ client.on('messageDelete', async (oldMsg) => {
         }
     }
 
-    const auditlog = oldMsg.guild.channels.cache.get(serverChannels.auditlogs)
+    const auditlog = oldMsg.guild.channels.cache.get(serverChannels.general)
     auditlog.send({embeds: [deleteLog]})
 })

@@ -43,7 +43,7 @@ module.exports = {
                 .setDescription(`Message purge amount: \`${amount}\`\nMessages purged: \`${messagesFetched.size}\``)
 
             await interaction.editReply({embeds: [embed], ephemeral: true});
-            const logs = guild.channels.cache.get(serverChannels.auditlogs);
+            const logs = guild.channels.cache.get(serverChannels.moderation);
             logs.send({embeds: [embed.addFields({name: `Moderator`, value: `${member}`, inline: true}, {name: `Channel`, value: `${interaction.channel}`, inline: true})]});
 
         } else {

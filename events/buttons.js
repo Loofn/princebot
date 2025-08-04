@@ -58,7 +58,7 @@ client.on('interactionCreate', async interaction => {
                 }
 
                 // Audit log for deleted vent message
-                const logChannel = interaction.guild.channels.cache.get(serverChannels.auditlogs);
+                const logChannel = interaction.guild.channels.cache.get(serverChannels.moderation);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                         .setTitle('Venting Message Deleted')
@@ -279,7 +279,7 @@ client.on('interactionCreate', async interaction => {
                 const verifyUser = await guild.members.cache.get(splitId[1]);
                 await verifyUser.roles.remove([serverRoles.unverified, serverRoles.jailrole]).catch();
                 await verifyUser.roles.add([serverRoles.member, serverRoles.verified]);
-                const logChannel = guild.channels.cache.get(serverChannels.auditlogs)
+                const logChannel = guild.channels.cache.get(serverChannels.moderation)
 
                 const verified = new EmbedBuilder()
                 .setTitle(`Member has been verified!`)

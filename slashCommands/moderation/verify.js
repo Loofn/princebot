@@ -39,7 +39,7 @@ module.exports = {
             if(!verifyUser.roles.cache.get(serverRoles.verified)){
                 await verifyUser.roles.remove([serverRoles.unverified, serverRoles.jailrole]).catch();
                 await verifyUser.roles.add([serverRoles.member, serverRoles.verified]);
-                const logChannel = guild.channels.cache.get(serverChannels.auditlogs)
+                const logChannel = guild.channels.cache.get(serverChannels.moderation)
 
                 const verified = new EmbedBuilder()
                 .setTitle(`Member has been verified!`)

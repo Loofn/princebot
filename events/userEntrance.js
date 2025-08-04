@@ -41,7 +41,7 @@ client.on('guildMemberAdd', async (member) => {
     entrance.send({content: `${member}`, embeds: [welcome], components: [row]}).then(msg => {
         storeUsers(member.id, msg.id);
     })
-    const auditlog = member.guild.channels.cache.get(serverChannels.auditlogs)
+    const auditlog = member.guild.channels.cache.get(serverChannels.general)
     auditlog.send({embeds: [embed]})
 })
 
@@ -62,8 +62,8 @@ client.on('guildMemberRemove', async (member) => {
             {name: `Joined server`, value: `${moment(member.joinedAt).format("MMMM Do YYYY")}\n\`${moment(member.joinedAt).fromNow()}\``, inline: true},
         )
 
-        const auditlog = member.guild.channels.cache.get(serverChannels.auditlogs)
-        auditlog.send({embeds: [embed]})
+        const auditlog = member.guild.channels.cache.get(serverChannels.general)
+        auditlog.send({embeds: [embed]});
     } catch (err) {
         console.error(err);
     }

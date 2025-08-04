@@ -4,7 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { isStaff } = require('../../function/roles');
-const { auditlogs } = require('../../data/channels.json');
+const serverChannels = require('../../data/channels.json');
 
 // Track TTS users per channel: { [guildId_channelId]: Set<userId> }
 const ttsUsers = {};
@@ -153,7 +153,7 @@ module.exports = {
                 .setColor('#FF0000')
                 .setTimestamp();
 
-            const auditlogChannel = guild.channels.cache.get(auditlogs);
+            const auditlogChannel = guild.channels.cache.get(serverChannels.general);
             auditlogChannel.send({ embeds: [embed] }).catch(err => console.error('Failed to send audit log:', err));
         }
     }

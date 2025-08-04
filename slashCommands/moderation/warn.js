@@ -36,7 +36,7 @@ module.exports = {
         if(await isStaff(member.id)){
             const warnedUser = await guild.members.fetch(options.getUser('user').id, {force: true, cache: true});
             const reason = options.getString('reason');
-            const logChannel = guild.channels.cache.get(serverChannels.auditlogs)
+            const logChannel = guild.channels.cache.get(serverChannels.moderation)
 
             if(warnedUser.user.bot){
                 const noBots = new EmbedBuilder()
